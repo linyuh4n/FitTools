@@ -1,17 +1,18 @@
 ---
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
-import { generateWebSiteJsonLd, generateOrganizationJsonLd } from '@/lib/seo';
-import '@/styles/global.css';
-import '@/styles/components.css';
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import ConsentBanner from "@/components/ConsentBanner.astro";
+import { generateWebSiteJsonLd, generateOrganizationJsonLd } from "@/lib/seo";
+import "@/styles/global.css";
+import "@/styles/components.css";
 
 interface Props {
   title: string;
   description: string;
   canonical?: string;
   ogImage?: string;
-  ogType?: 'website' | 'article';
-  twitterCard?: 'summary' | 'summary_large_image';
+  ogType?: "website" | "article";
+  twitterCard?: "summary" | "summary_large_image";
   jsonLd?: Record<string, unknown>;
   currentPath?: string;
 }
@@ -21,15 +22,15 @@ const {
   description,
   canonical,
   ogImage,
-  ogType = 'website',
-  twitterCard = 'summary_large_image',
+  ogType = "website",
+  twitterCard = "summary_large_image",
   jsonLd,
-  currentPath = '/',
+  currentPath = "/",
 } = Astro.props;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://fittools.com.br';
-const fullCanonical = canonical ? `${siteUrl}${canonical.startsWith('/') ? '' : '/'}${canonical}` : siteUrl;
-const fullOgImage = ogImage ? `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}` : `${siteUrl}/social/og-default.svg`;
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || "https://fittools.com.br";
+const fullCanonical = canonical ? `${siteUrl}${canonical.startsWith("/") ? "" : "/"}${canonical}` : siteUrl;
+const fullOgImage = ogImage ? `${siteUrl}${ogImage.startsWith("/") ? "" : "/"}${ogImage}` : `${siteUrl}/social/og-default.svg`;
 
 const webSiteJsonLd = generateWebSiteJsonLd();
 const organizationJsonLd = generateOrganizationJsonLd();
@@ -83,7 +84,7 @@ const organizationJsonLd = generateOrganizationJsonLd();
 
     <style>
       :root {
-        --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       }
     </style>
   </head>
@@ -97,5 +98,8 @@ const organizationJsonLd = generateOrganizationJsonLd();
     </main>
 
     <Footer />
+
+    <!-- LGPD Consent Banner -->
+    <ConsentBanner />
   </body>
 </html>

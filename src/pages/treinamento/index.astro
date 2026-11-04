@@ -1,0 +1,290 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import { generateArticleJsonLd } from "@/lib/seo";
+import "@/styles/components.css";
+
+const title = "Treinamento - Em construção";
+const description = "Seção de treinamento em desenvolvimento. Em breve: calculadoras de volume, guias de exercícios, periodização e programas de treino.";
+const canonical = "/treinamento/";
+
+const jsonLd = generateArticleJsonLd({
+  title,
+  description,
+  url: "https://fittools.com.br/treinamento/",
+  image: "https://fittools.com.br/social/og-default.svg",
+  datePublished: new Date().toISOString(),
+  dateModified: new Date().toISOString(),
+  authorName: "FitTools",
+  publisherName: "FitTools",
+});
+---
+
+<MainLayout title={title} description={description} canonical={canonical} jsonLd={jsonLd} currentPath="/treinamento/">
+  <section class="construction-page" aria-labelledby="construction-title">
+    <div class="container">
+      <div class="construction-content">
+        <div class="construction-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="64" height="64">
+            <circle cx="32" cy="32" r="28" />
+            <path d="M32 16v20M32 36v4M20 32h24" />
+            <path d="M16 44c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8" />
+          </svg>
+        </div>
+        
+        <h1 id="construction-title" class="construction-title">Treinamento</h1>
+        
+        <p class="construction-subtitle">Esta seção está em desenvolvimento</p>
+        
+        <div class="construction-message">
+          <p>Estamos preparando conteúdos completos sobre treinamento resistido, periodização, execução de exercícios e programação de treinos baseada em evidência científica.</p>
+        </div>
+
+        <div class="construction-preview">
+          <h2 class="construction-preview-title">O que vem por aí</h2>
+          
+          <ul class="construction-features">
+            <li>
+              <span class="feature-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </span>
+              <div class="feature-content">
+                <strong>Calculadoras de treino</strong>
+                <span>Volume semanal, intensidade (RPE/RMR), frequência ideal, progressão de carga</span>
+              </div>
+            </li>
+            <li>
+              <span class="feature-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+              </span>
+              <div class="feature-content">
+                <strong>Biblioteca de exercícios</strong>
+                <span>Vídeos/gifs de execução, músculos alvo, variações, erros comuns por padrão de movimento</span>
+              </div>
+            </li>
+            <li>
+              <span class="feature-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </span>
+              <div class="feature-content">
+                <strong>Periodização e programas</strong>
+                <span>Linear, undulatória, bloco; templates para iniciante, intermediário, avançado</span>
+              </div>
+            </li>
+            <li>
+              <span class="feature-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </span>
+              <div class="feature-content">
+                <strong>Progressão e auto-regulação</strong>
+                <span>RPE/RIR, double progression, deload, testes de 1RM, fadiga acumulada</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="construction-cta">
+          <p>Enquanto isso, use nossa calculadora disponível:</p>
+          <div class="construction-links">
+            <a href="/ferramentas/calculadora-volume-treino/" class="btn btn-primary">Calculadora de Volume de Treino</a>
+            <a href="/ferramentas/calculadora-gordura-corporal/" class="btn btn-secondary">Calculadora de % Gordura</a>
+          </div>
+        </div>
+
+        <div class="construction-notify">
+          <p>Quer ser avisado quando lançarmos?</p>
+          <form class="notify-form" action="https://formspree.io/f/placeholder" method="POST" data-netlify="true">
+            <input type="email" name="email" placeholder="seu@email.com" required aria-label="Seu e-mail para notificações" />
+            <button type="submit" class="btn btn-primary">Me avise</button>
+          </form>
+          <p class="notify-note">Respeitamos sua privacidade. Sem spam. <a href="/privacidade/">Política de privacidade</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .construction-page {
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-16) var(--space-4);
+    }
+
+    .construction-content {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .construction-icon {
+      color: var(--color-primary);
+      margin-bottom: var(--space-6);
+      opacity: 0.8;
+    }
+
+    .construction-title {
+      font-size: var(--text-4xl);
+      font-weight: var(--font-bold);
+      margin-bottom: var(--space-2);
+      color: var(--color-text);
+    }
+
+    @media (min-width: 768px) {
+      .construction-title { font-size: var(--text-5xl); }
+    }
+
+    .construction-subtitle {
+      font-size: var(--text-xl);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-8);
+      font-weight: var(--font-normal);
+    }
+
+    .construction-message {
+      margin-bottom: var(--space-12);
+      padding: var(--space-6);
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+    }
+
+    .construction-message p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    .construction-preview {
+      margin-bottom: var(--space-12);
+      text-align: left;
+    }
+
+    .construction-preview-title {
+      font-size: var(--text-lg);
+      font-weight: var(--font-semibold);
+      margin-bottom: var(--space-6);
+      color: var(--color-text);
+      text-align: center;
+    }
+
+    .construction-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .construction-features li {
+      display: flex;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .construction-features li:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-icon {
+      color: var(--color-primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .feature-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      text-align: left;
+    }
+
+    .feature-content strong {
+      color: var(--color-text);
+      font-size: var(--text-base);
+    }
+
+    .feature-content span {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    .construction-cta {
+      margin-bottom: var(--space-12);
+      padding: var(--space-6);
+      background: var(--color-primary-light);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-primary);
+    }
+
+    .construction-cta p {
+      margin: 0 0 var(--space-4);
+      color: var(--color-primary-dark);
+      font-weight: var(--font-medium);
+    }
+
+    .construction-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      justify-content: center;
+    }
+
+    .construction-notify {
+      padding-top: var(--space-8);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .construction-notify > p:first-child {
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+    }
+
+    .notify-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      max-width: 320px;
+      margin: 0 auto var(--space-3);
+    }
+
+    @media (min-width: 480px) {
+      .notify-form {
+        flex-direction: row;
+      }
+    }
+
+    .notify-form input {
+      flex: 1;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-base);
+      font-family: inherit;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+
+    .notify-form input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+
+    .notify-note {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .notify-note a {
+      color: var(--color-primary);
+    }
+  </style>
+</MainLayout>

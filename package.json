@@ -2,16 +2,16 @@
   "name": "fittools",
   "type": "module",
   "version": "0.1.0",
-  "description": "Plataforma de ferramentas gratuitas para fitness, nutrição e bem-estar",
+  "description": "Plataforma de ferramentas gratuitas para fitness, nutricao e bem-estar",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && npx workbox generateSW workbox-config.cjs",
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts,.astro",
+    "lint": "eslint .",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -22,10 +22,13 @@
     "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "astro-eslint-parser": "^1.0.0",
     "eslint": "^8.57.0",
+    "eslint-plugin-astro": "^1.0.0",
     "prettier": "^3.2.0",
     "prettier-plugin-astro": "^0.13.0",
     "typescript": "^5.4.0",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "workbox-cli": "^7.0.0"
   }
 }

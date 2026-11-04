@@ -43,6 +43,15 @@ export function formatDateISO(date: Date | string): string {
   return d.toISOString().split('T')[0];
 }
 
+export function formatNumber(value: number, options?: { decimals?: number }): string {
+  const decimals = options?.decimals ?? 0;
+  const rounded = Number(value.toFixed(decimals));
+  return rounded.toLocaleString("pt-BR", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength - 3) + '...';

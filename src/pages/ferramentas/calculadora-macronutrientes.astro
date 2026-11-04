@@ -1,0 +1,377 @@
+---
+import { calculateMacros } from "@/lib/calculations/macro-calculator";
+import MainLayout from "@/layouts/MainLayout.astro";
+import CalculatorCard from "@/components/CalculatorCard.astro";
+import ResultCard from "@/components/ResultCard.astro";
+import Disclaimer from "@/components/Disclaimer.astro";
+import RelatedTools from "@/components/RelatedTools.astro";
+import { generateCalculatorJsonLd, generateBreadcrumbJsonLd } from "@/lib/seo";
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: "Início", url: "https://fittools.com.br/" },
+  { name: "Ferramentas", url: "https://fittools.com.br/ferramentas/" },
+  { name: "Calculadora de Macronutrientes", url: "https://fittools.com.br/ferramentas/calculadora-macronutrientes/" },
+]);
+
+const calculatorJsonLd = generateCalculatorJsonLd({
+  name: "Calculadora de Macronutrientes",
+  description: "Calcule sua distribuição ideal de proteínas, carboidratos e gorduras baseada no gasto calórico, objetivo e preferências.",
+  url: "https://fittools.com.br/ferramentas/calculadora-macronutrientes/",
+  calculatorType: "NutritionMacroCalculator",
+});
+
+interface Props {
+  weightKg?: string;
+  heightCm?: string;
+  age?: string;
+  sex?: "male" | "female";
+  activityLevel?: "sedentary" | "light" | "moderate" | "very" | "extra";
+  goal?: "maintain" | "lose" | "gain";
+  proteinPerKg?: string;
+  fatPercent?: string;
+  submitted?: boolean;
+}
+
+const {
+  weightKg = "",
+  heightCm = "",
+  age = "",
+  sex = "male",
+  activityLevel = "moderate",
+  goal = "maintain",
+  proteinPerKg = "",
+  fatPercent = "",
+  submitted = false,
+} = Astro.props;
+
+let result: ReturnType<typeof calculateMacros> | null = null;
+let errors: Record<string, string> = {};
+
+if (submitted) {
+  const w = parseFloat(weightKg);
+  const h = parseFloat(heightCm);
+  const a = parseInt(age);
+  const ppk = proteinPerKg ? parseFloat(proteinPerKg) : undefined;
+  const fp = fatPercent ? parseFloat(fatPercent) / 100 : undefined;
+
+  if (!weightKg || isNaN(w) || w <= 0 || w > 300) errors.weightKg = "Peso inválido (0.1–300 kg)";
+  if (!heightCm || isNaN(h) || h <= 0 || h > 250) errors.heightCm = "Altura inválida (1–250 cm)";
+  if (!age || isNaN(a) || a < 10 || a > 100) errors.age = "Idade inválida (10–100 anos)";
+  if (ppk !== undefined && (isNaN(ppk) || ppk < 0.5 || ppk > 4)) errors.proteinPerKg = "Proteína por kg deve ser 0.5–4";
+  if (fp !== undefined && (isNaN(fp) || fp < 0.1 || fp > 0.5)) errors.fatPercent = "Gordura % deve ser 10–50%";
+
+  if (Object.keys(errors).length === 0) {
+    try {
+      result = calculateMacros({
+        weightKg: w,
+        heightCm: h,
+        age: a,
+        sex,
+        activityLevel,
+        goal,
+        proteinPerKg: ppk,
+        fatPercent: fp,
+      });
+    } catch (e) {
+      errors.form = e instanceof Error ? e.message : "Erro no cálculo";
+    }
+  }
+}
+
+const activityLabels: Record<string, string> = {
+  sedentary: "Sedentário (pouco/não exercício, trabalho escritório)",
+  light: "Levemente ativo (exercício leve 1–3x/semana)",
+  moderate: "Moderadamente ativo (exercício moderado 3–5x/semana)",
+  very: "Muito ativo (exercício intenso 6–7x/semana)",
+  extra: "Extremamente ativo (treino 2x/dia + trabalho físico)",
+};
+
+const goalLabels: Record<string, string> = {
+  maintain: "Manutenção de peso",
+  lose: "Perda de peso (cutting)",
+  gain: "Ganho de massa (bulking)",
+};
+
+const sexLabels: Record<string, string> = {
+  male: "Masculino (usa equação masculina)",
+  female: "Feminino (usa equação feminina)",
+};
+---
+
+<MainLayout
+  title="Calculadora de Macronutrientes | FitTools"
+  description="Calcule sua distribuição ideal de proteínas, carboidratos e gorduras baseada no gasto calórico total (TDEE), objetivo e preferências. Baseada na equação Mifflin-St Jeor."
+  canonical="/ferramentas/calculadora-macronutrientes/"
+  ogImage="/social/og-macro-calculator.svg"
+  jsonLd={{ "@graph": [calculatorJsonLd, breadcrumbJsonLd] }}
+  currentPath="/ferramentas/"
+>
+  <article class="calculator-page">
+    <header class="page-header">
+      <nav class="breadcrumbs" aria-label="Navegação">
+        <a href="/">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/ferramentas/">Ferramentas</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Calculadora de Macronutrientes</span>
+      </nav>
+      <h1>Calculadora de Macronutrientes</h1>
+      <p class="page-description">
+        Determine a distribuição ideal de proteínas, carboidratos e gorduras para seu objetivo.
+        Baseada no seu gasto calórico total (TDEE) calculado pela equação Mifflin-St Jeor.
+      </p>
+    </header>
+
+    <section class="calculator-form-section" aria-labelledby="form-title">
+      <h2 id="form-title">Seus dados</h2>
+      
+      <form method="GET" action="/ferramentas/calculadora-macronutrientes/" class="calculator-form">
+        <input type="hidden" name="submitted" value="true" />
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="sex">Sexo biológico <span class="help-text" data-tooltip="A equação Mifflin-St Jeor usa sexo biológico para estimar a taxa metabólica basal. Escolha o que melhor representa sua composição corporal.">ℹ️</span></label>
+            <select id="sex" name="sex" required>
+              <option value="male" selected={sex === "male"}>Masculino</option>
+              <option value="female" selected={sex === "female"}>Feminino</option>
+            </select>
+            {errors.sex && <p class="error-message" role="alert">{errors.sex}</p>}
+          </div>
+
+          <div class="form-group">
+            <label for="weightKg">Peso corporal (kg) *</label>
+            <input
+              type="number"
+              id="weightKg"
+              name="weightKg"
+              step="0.1"
+              min="0.1"
+              max="300"
+              value={weightKg}
+              placeholder="Ex: 75"
+              required
+              aria-describedby="weight-help"
+            />
+            <span id="weight-help" class="help-text">Entre 0.1 e 300 kg</span>
+            {errors.weightKg && <p class="error-message" role="alert">{errors.weightKg}</p>}
+          </div>
+
+          <div class="form-group">
+            <label for="heightCm">Altura (cm) *</label>
+            <input
+              type="number"
+              id="heightCm"
+              name="heightCm"
+              step="1"
+              min="1"
+              max="250"
+              value={heightCm}
+              placeholder="Ex: 175"
+              required
+              aria-describedby="height-help"
+            />
+            <span id="height-help" class="help-text">Entre 1 e 250 cm</span>
+            {errors.heightCm && <p class="error-message" role="alert">{errors.heightCm}</p>}
+          </div>
+
+          <div class="form-group">
+            <label for="age">Idade (anos) *</label>
+            <input
+              type="number"
+              id="age"
+              name="age"
+              min="10"
+              max="100"
+              value={age}
+              placeholder="Ex: 30"
+              required
+              aria-describedby="age-help"
+            />
+            <span id="age-help" class="help-text">Entre 10 e 100 anos</span>
+            {errors.age && <p class="error-message" role="alert">{errors.age}</p>}
+          </div>
+
+          <div class="form-group">
+            <label for="activityLevel">Nível de atividade física *</label>
+            <select id="activityLevel" name="activityLevel" required>
+              <option value="sedentary" selected={activityLevel === "sedentary"}>Sedentário</option>
+              <option value="light" selected={activityLevel === "light"}>Levemente ativo</option>
+              <option value="moderate" selected={activityLevel === "moderate"}>Moderadamente ativo</option>
+              <option value="very" selected={activityLevel === "very"}>Muito ativo</option>
+              <option value="extra" selected={activityLevel === "extra"}>Extremamente ativo</option>
+            </select>
+            <details class="activity-details">
+              <summary>Ver descrições detalhadas</summary>
+              <ul>
+                <li><strong>Sedentário (1.2×):</strong> Pouco/não exercício, trabalho escritório</li>
+                <li><strong>Leve (1.375×):</strong> Exercício leve 1–3x/semana</li>
+                <li><strong>Moderado (1.55×):</strong> Exercício moderado 3–5x/semana</li>
+                <li><strong>Intenso (1.725×):</strong> Exercício intenso 6–7x/semana</li>
+                <li><strong>Extremo (1.9×):</strong> Treino 2x/dia + trabalho físico</li>
+              </ul>
+              <p class="help-text">Muitos superestimam seu nível. "Treino 4x mas passo o dia sentado" → Leve.</p>
+            </details>
+          </div>
+
+          <div class="form-group">
+            <label for="goal">Objetivo *</label>
+            <select id="goal" name="goal" required>
+              <option value="maintain" selected={goal === "maintain"}>Manutenção de peso</option>
+              <option value="lose" selected={goal === "lose"}>Perda de peso (cutting)</option>
+              <option value="gain" selected={goal === "gain"}>Ganho de massa (bulking)</option>
+            </select>
+            <details class="goal-details">
+              <summary>Como o objetivo afeta os macros</summary>
+              <ul>
+                <li><strong>Manutenção:</strong> Proteína 1.6g/kg, gordura 25%, carboidrato restante</li>
+                <li><strong>Perda (cutting):</strong> Proteína 2.0g/kg (preserva músculo), déficit 20%</li>
+                <li><strong>Ganho (bulking):</strong> Proteína 1.8g/kg, superávit 10%</li>
+              </ul>
+            </details>
+          </div>
+        </div>
+
+        <details class="advanced-options">
+          <summary>Opções avançadas (opcional)</summary>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="proteinPerKg">Proteína alvo (g/kg/dia)</label>
+              <input
+                type="number"
+                id="proteinPerKg"
+                name="proteinPerKg"
+                step="0.1"
+                min="0.5"
+                max="4"
+                value={proteinPerKg}
+                placeholder="Ex: 2.0 (padrão varia por objetivo)"
+              />
+              <span class="help-text">Padrão: 1.6 (manutenção), 2.0 (cutting), 1.8 (bulking)</span>
+              {errors.proteinPerKg && <p class="error-message" role="alert">{errors.proteinPerKg}</p>}
+            </div>
+
+            <div class="form-group">
+              <label for="fatPercent">Gordura (% das calorias totais)</label>
+              <input
+                type="number"
+                id="fatPercent"
+                name="fatPercent"
+                step="1"
+                min="10"
+                max="50"
+                value={fatPercent}
+                placeholder="Ex: 25 (padrão 25%)"
+              />
+              <span class="help-text">Padrão: 25%. Intervalos típicos: 20–35%</span>
+              {errors.fatPercent && <p class="error-message" role="alert">{errors.fatPercent}</p>}
+            </div>
+          </div>
+        </details>
+
+        {errors.form && <div class="form-error" role="alert">{errors.form}</div>}
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg">Calcular Macronutrientes</button>
+          <a href="/ferramentas/calculadora-macronutrientes/" class="btn btn-secondary btn-lg">Limpar</a>
+        </div>
+      </form>
+    </section>
+
+    {result && (
+      <section class="calculator-results" aria-labelledby="results-title">
+        <h2 id="results-title">Seus Macronutrientes</h2>
+        
+        <ResultCard
+          title="Resumo Calórico"
+          value={result.targetCalories + " kcal/dia"}
+          subtitle={"TMB: " + result.bmr + " kcal | GET (TDEE): " + result.tdee + " kcal | Ajuste: " + goalLabels[goal]}
+        />
+
+        <div class="macro-grid">
+          <ResultCard
+            title="Proteína"
+            value={result.protein.grams + " g"}
+            subtitle={result.protein.percent + "% das calorias (" + result.protein.calories + " kcal)"}
+            variant="primary"
+            icon="🥩"
+          />
+          <ResultCard
+            title="Carboidratos"
+            value={result.carbs.grams + " g"}
+            subtitle={result.carbs.percent + "% das calorias (" + result.carbs.calories + " kcal)"}
+            variant="secondary"
+            icon="🍚"
+          />
+          <ResultCard
+            title="Gorduras"
+            value={result.fat.grams + " g"}
+            subtitle={result.fat.percent + "% das calorias (" + result.fat.calories + " kcal)"}
+            variant="accent"
+            icon="🥑"
+          />
+        </div>
+
+        <div class="result-details">
+          <h3>Detalhes do cálculo</h3>
+          <ul>
+            <li><strong>Taxa Metabólica Basal (TMB):</strong> {result.bmr} kcal/dia (Mifflin-St Jeor)</li>
+            <li><strong>Fator de atividade ({activityLabels[activityLevel].split(" ")[0]}):</strong> {activityLabels[activityLevel]}</li>
+            <li><strong>Gasto Energético Total (GET/TDEE):</strong> {result.tdee} kcal/dia</li>
+            <li><strong>Objetivo:</strong> {goalLabels[goal]} (ajuste de {goal === "lose" ? "−20%" : goal === "gain" ? "+10%" : "0%"})</li>
+            <li><strong>Meta calórica:</strong> {result.targetCalories} kcal/dia</li>
+            <li><strong>Proteína:</strong> {result.protein.grams}g ({result.protein.percent}%) — {result.protein.grams / parseFloat(weightKg)}g/kg</li>
+            <li><strong>Gordura:</strong> {result.fat.grams}g ({result.fat.percent}%) — {Math.round((result.fat.grams * 9 / result.targetCalories) * 100)}% das kcal</li>
+            <li><strong>Carboidratos:</strong> {result.carbs.grams}g ({result.carbs.percent}%) — restante</li>
+          </ul>
+        </div>
+
+        <Disclaimer type="nutrition" />
+      </section>
+    )}
+
+    <section class="calculator-info">
+      <h2>Sobre esta calculadora</h2>
+      
+      <h3>Metodologia</h3>
+      <ul>
+        <li><strong>TMB:</strong> Equação de Mifflin-St Jeor (1990) — padrão ouro atual para estimativa de gasto basal</li>
+        <li><strong>GET/TDEE:</strong> TMB × fator de atividade (valores padrão da literatura)</li>
+        <li><strong>Proteína:</strong> Baseada em evidências para cada objetivo (ISSN, ACSM, meta-análises)</li>
+        <li><strong>Gordura:</strong> Percentual configurável (padrão 25%, faixa saudável 20–35%)</li>
+        <li><strong>Carboidratos:</strong> Calorias restantes após proteína e gordura</li>
+      </ul>
+
+      <h3>Referências de proteína por objetivo</h3>
+      <table>
+        <thead>
+          <tr><th>Objetivo</th><th>g/kg/dia</th><th>Base científica</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Manutenção / Saúde</td><td>1.6</td><td>ISSN Position Stand, Morton et al. 2018</td></tr>
+          <tr><td>Cutting / Déficit</td><td>2.0</td><td>Helms et al. 2014; Campbell et al. 2018 (preservação massa magra)</td></tr>
+          <tr><td>Bulking / Superávit</td><td>1.8</td><td>ISSN; Slater & Phillips 2011</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Limitações</h3>
+      <ul>
+        <li>Equações preditivas têm erro de ±10–15% (≈150–300 kcal) para indivíduo único</li>
+        <li>Não mede massa magra diretamente — pessoas muito musculosas: subestima; obesas: superestima</li>
+        <li>Não captura adaptação metabólica pós-emagrecimento prolongado</li>
+        <li>Necessidades individuais variam por genética, sono, estresse, saúde tireoidiana, etc.</li>
+        <li>Não substitui avaliação com nutricionista</li>
+      </ul>
+
+      <h3>Próximos passos</h3>
+      <ul>
+        <li>Use esses valores como <strong>ponto de partida</strong></li>
+        <li>Acompanhe peso semanal, medidas, performance e saciedade</li>
+        <li>Ajuste calorias em ±5–10% se não houver progresso em 2–3 semanas</li>
+        <li>Priorize alimentos minimamente processados, distribua proteína em 3–5 refeições</li>
+        <li>Consulte nutricionista para prescrição individualizada</li>
+      </ul>
+    </section>
+
+    <RelatedTools toolIds={["protein-calculator", "calorie-calculator"]} />
+  </article>
+</MainLayout>

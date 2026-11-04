@@ -1,0 +1,314 @@
+---
+import { calculateVolume, calculateMultiExerciseVolume, VolumeInput } from "@/lib/calculations/volume-calculator";
+import MainLayout from "@/layouts/MainLayout.astro";
+import CalculatorCard from "@/components/CalculatorCard.astro";
+import ResultCard from "@/components/ResultCard.astro";
+import Disclaimer from "@/components/Disclaimer.astro";
+import RelatedTools from "@/components/RelatedTools.astro";
+import { generateCalculatorJsonLd, generateBreadcrumbJsonLd } from "@/lib/seo";
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: "Início", url: "https://fittools.com.br/" },
+  { name: "Ferramentas", url: "https://fittools.com.br/ferramentas/" },
+  { name: "Calculadora de Volume de Treino", url: "https://fittools.com.br/ferramentas/calculadora-volume-treino/" },
+]);
+
+const calculatorJsonLd = generateCalculatorJsonLd({
+  name: "Calculadora de Volume de Treino",
+  description: "Calcule volume de treino (tonelagem), 1RM estimado, trabalho mecânico e duração da sessão. Suporta múltiplos exercícios.",
+  url: "https://fittools.com.br/ferramentas/calculadora-volume-treino/",
+  calculatorType: "TrainingVolumeCalculator",
+});
+
+interface Props {
+  mode?: "single" | "multi";
+  submitted?: boolean;
+  // Single exercise
+  sets?: string;
+  reps?: string;
+  weightKg?: string;
+  rpe?: string;
+  restMinutes?: string;
+  // Multi exercise (JSON)
+  exercisesJson?: string;
+}
+
+const {
+  mode = "single",
+  submitted = false,
+  sets = "3",
+  reps = "10",
+  weightKg = "100",
+  rpe = "",
+  restMinutes = "2",
+  exercisesJson = "",
+} = Astro.props;
+
+let singleResult: ReturnType<typeof calculateVolume> | null = null;
+let multiResult: ReturnType<typeof calculateMultiExerciseVolume> | null = null;
+let errors: Record<string, string> = {};
+
+if (submitted) {
+  if (mode === "single") {
+    const s = parseInt(sets);
+    const r = parseInt(reps);
+    const w = parseFloat(weightKg);
+    const rpeVal = rpe ? parseInt(rpe) : undefined;
+    const restVal = restMinutes ? parseInt(restMinutes) : undefined;
+
+    if (!sets || isNaN(s) || s < 1 || s > 50) errors.sets = "Séries: 1–50";
+    if (!reps || isNaN(r) || r < 1 || r > 100) errors.reps = "Repetições: 1–100";
+    if (!weightKg || isNaN(w) || w < 0 || w > 500) errors.weightKg = "Peso: 0–500 kg";
+    if (rpeVal !== undefined && (isNaN(rpeVal) || rpeVal < 1 || rpeVal > 10)) errors.rpe = "RPE: 1–10";
+    if (restVal !== undefined && (isNaN(restVal) || restVal < 0 || restVal > 30)) errors.restMinutes = "Descanso: 0–30 min";
+
+    if (Object.keys(errors).length === 0) {
+      try {
+        singleResult = calculateVolume({ sets: s, reps: r, weightKg: w, rpe: rpeVal, restMinutes: restVal });
+      } catch (e) {
+        errors.form = e instanceof Error ? e.message : "Erro no cálculo";
+      }
+    }
+  } else {
+    if (!exercisesJson.trim()) {
+      errors.exercisesJson = "Adicione pelo menos um exercício";
+    } else {
+      try {
+        const exercises = JSON.parse(exercisesJson) as Array<VolumeInput & { name: string }>;
+        if (!exercises.length) errors.exercisesJson = "Adicione pelo menos um exercício";
+        else {
+          multiResult = calculateMultiExerciseVolume({ exercises });
+        }
+      } catch (e) {
+        errors.exercisesJson = "JSON inválido. Use formato: [{name, sets, reps, weightKg, rpe?, restMinutes?}]";
+      }
+    }
+  }
+}
+
+const exampleExercises = [
+  { name: "Supino reto", sets: 3, reps: 10, weightKg: 80, rpe: 8, restMinutes: 2 },
+  { name: "Agachamento livre", sets: 4, reps: 8, weightKg: 120, rpe: 9, restMinutes: 3 },
+  { name: "Remada curvada", sets: 3, reps: 12, weightKg: 60, rpe: 8, restMinutes: 2 },
+];
+const exampleJson = JSON.stringify(exampleExercises, null, 2);
+---
+
+<MainLayout
+  title="Calculadora de Volume de Treino | FitTools"
+  description="Calcule volume de treino (tonelagem), 1RM estimado (Epley e RPE), trabalho mecânico aproximado e duração da sessão. Suporte a exercício único ou múltiplos."
+  canonical="/ferramentas/calculadora-volume-treino/"
+  ogImage="/social/og-volume-calculator.svg"
+  jsonLd={{ "@graph": [calculatorJsonLd, breadcrumbJsonLd] }}
+  currentPath="/ferramentas/"
+>
+  <article class="calculator-page">
+    <header class="page-header">
+      <nav class="breadcrumbs" aria-label="Navegação">
+        <a href="/">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/ferramentas/">Ferramentas</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Calculadora de Volume de Treino</span>
+      </nav>
+      <h1>Calculadora de Volume de Treino</h1>
+      <p class="page-description">
+        Calcule volume de treino (tonelagem = séries × repetições × carga), 1RM estimado (fórmula de Epley e baseada em RPE),
+        trabalho mecânico aproximado e duração estimada da sessão.
+      </p>
+    </header>
+
+    <section class="calculator-form-section" aria-labelledby="form-title">
+      <h2 id="form-title">Modo de cálculo</h2>
+      
+      <div class="mode-toggle" role="radiogroup" aria-label="Modo de cálculo">
+        <label class="mode-option">
+          <input type="radio" name="mode" value="single" checked={mode === "single"} onchange="this.form.submit()" />
+          <span>Exercício único</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="mode" value="multi" checked={mode === "multi"} onchange="this.form.submit()" />
+          <span>Múltiplos exercícios</span>
+        </label>
+      </div>
+
+      <form method="GET" action="/ferramentas/calculadora-volume-treino/" class="calculator-form">
+        <input type="hidden" name="submitted" value="true" />
+        <input type="hidden" name="mode" value={mode} />
+        
+        {mode === "single" && (
+          <>
+            <h3>Exercício único</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="sets">Séries *</label>
+                <input type="number" id="sets" name="sets" min="1" max="50" value={sets} required />
+                {errors.sets && <p class="error-message" role="alert">{errors.sets}</p>}
+              </div>
+              <div class="form-group">
+                <label for="reps">Repetições por série *</label>
+                <input type="number" id="reps" name="reps" min="1" max="100" value={reps} required />
+                {errors.reps && <p class="error-message" role="alert">{errors.reps}</p>}
+              </div>
+              <div class="form-group">
+                <label for="weightKg">Carga (kg) *</label>
+                <input type="number" id="weightKg" name="weightKg" step="0.5" min="0" max="500" value={weightKg} required />
+                {errors.weightKg && <p class="error-message" role="alert">{errors.weightKg}</p>}
+              </div>
+              <div class="form-group">
+                <label for="rpe">RPE (1–10, opcional)</label>
+                <input type="number" id="rpe" name="rpe" min="1" max="10" value={rpe} placeholder="Ex: 8" />
+                <span class="help-text">Rate of Perceived Exertion. 10 = falha, 9 = 1 repetição na reserva, etc.</span>
+                {errors.rpe && <p class="error-message" role="alert">{errors.rpe}</p>}
+              </div>
+              <div class="form-group">
+                <label for="restMinutes">Descanso entre séries (min) *</label>
+                <input type="number" id="restMinutes" name="restMinutes" min="0" max="30" value={restMinutes} required />
+                {errors.restMinutes && <p class="error-message" role="alert">{errors.restMinutes}</p>}
+              </div>
+            </div>
+          </>
+        )}
+
+        {mode === "multi" && (
+          <>
+            <h3>Múltiplos exercícios (JSON)</h3>
+            <div class="form-group">
+              <label for="exercisesJson">Lista de exercícios *</label>
+              <textarea id="exercisesJson" name="exercisesJson" rows="12" class="json-textarea" placeholder={exampleJson} required>{exercisesJson || exampleJson}</textarea>
+              <span class="help-text">Formato: array de objetos com name, sets, reps, weightKg, rpe?, restMinutes?</span>
+              {errors.exercisesJson && <p class="error-message" role="alert">{errors.exercisesJson}</p>}
+            </div>
+            <details class="json-help">
+              <summary>Exemplo e campos disponíveis</summary>
+              <pre>{exampleJson}</pre>
+              <ul>
+                <li><strong>name</strong> (string): nome do exercício</li>
+                <li><strong>sets</strong> (number): número de séries (1–50)</li>
+                <li><strong>reps</strong> (number): repetições por série (1–100)</li>
+                <li><strong>weightKg</strong> (number): carga em kg (0–500)</li>
+                <li><strong>rpe</strong> (number, opcional): 1–10 para 1RM baseado em RPE</li>
+                <li><strong>restMinutes</strong> (number, opcional): descanso entre séries em minutos (0–30)</li>
+              </ul>
+            </details>
+          </>
+        )}
+
+        {errors.form && <div class="form-error" role="alert">{errors.form}</div>}
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg">Calcular Volume</button>
+          <a href="/ferramentas/calculadora-volume-treino/" class="btn btn-secondary btn-lg">Limpar</a>
+        </div>
+      </form>
+    </section>
+
+    {singleResult && (
+      <section class="calculator-results" aria-labelledby="results-title">
+        <h2 id="results-title">Resultado - Exercício Único</h2>
+        
+        <div class="macro-grid">
+          <ResultCard title="Volume Total (Tonelagem)" value={singleResult.volumeLoad + " kg"} subtitle={singleResult.sets + " séries × " + singleResult.reps + " reps × " + weightKg + " kg"} variant="primary" icon="📊" />
+          <ResultCard title="Volume por Série" value={singleResult.volumeLoadPerSet + " kg"} subtitle={singleResult.reps + " reps × " + weightKg + " kg"} variant="secondary" icon="📈" />
+          <ResultCard title="1RM (Epley)" value={singleResult.estimated1RM + " kg"} subtitle="Fórmula: peso × (1 + reps/30)" variant="accent" icon="💪" />
+          {singleResult.estimated1RMRPE !== singleResult.estimated1RM && (
+            <ResultCard title="1RM (RPE " + rpe + ")" value={singleResult.estimated1RMRPE + " kg"} subtitle="Ajustado por RIR = " + (10 - parseInt(rpe)) + " repetições na reserva" variant="accent" icon="🎯" />
+          )}
+          <ResultCard title="Total de Repetições" value={singleResult.totalReps} subtitle={singleResult.sets + " séries × " + singleResult.reps + " reps"} variant="secondary" icon="🔢" />
+          <ResultCard title="Trabalho Mecânico" value={singleResult.workKcal + " kcal"} subtitle="Aproximado (F × d × reps)" variant="primary" icon="⚡" />
+          <ResultCard title="Duração Estimada" value={singleResult.sessionDurationMin + " min"} subtitle={singleResult.sets + " séries com " + restMinutes + " min de descanso"} variant="secondary" icon="⏱️" />
+        </div>
+
+        <Disclaimer type="training" />
+      </section>
+    )}
+
+    {multiResult && (
+      <section class="calculator-results" aria-labelledby="results-title">
+        <h2 id="results-title">Resultado - Sessão Completa</h2>
+        
+        <div class="macro-grid">
+          <ResultCard title="Volume Total da Sessão" value={multiResult.totalVolumeLoad + " kg"} subtitle={multiResult.totalSets + " séries totais, " + multiResult.totalReps + " reps totais"} variant="primary" icon="📊" />
+          <ResultCard title="Trabalho Total" value={multiResult.estimatedWorkKcal + " kcal"} subtitle="Soma do trabalho mecânico aproximado" variant="accent" icon="⚡" />
+          <ResultCard title="Duração Total" value={multiResult.estimatedSessionDurationMin + " min"} subtitle="Inclui tempo de série + descanso" variant="secondary" icon="⏱️" />
+        </div>
+
+        <h3>Detalhes por exercício</h3>
+        <div class="exercise-table-container">
+          <table class="exercise-table">
+            <thead>
+              <tr>
+                <th>Exercício</th>
+                <th>Séries</th>
+                <th>Reps</th>
+                <th>Carga (kg)</th>
+                <th>RPE</th>
+                <th>Volume (kg)</th>
+                <th>1RM Epley</th>
+                <th>1RM RPE</th>
+                <th>Trabalho (kcal)</th>
+                <th>Duração (min)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {multiResult.exercises.map((ex) => (
+                <tr>
+                  <td>{ex.name}</td>
+                  <td>{ex.sets}</td>
+                  <td>{ex.reps}</td>
+                  <td>{ex.volumeLoadPerSet / ex.reps}</td>
+                  <td>{ex.estimated1RMRPE !== ex.estimated1RM ? "✓" : "—"}</td>
+                  <td>{ex.volumeLoad}</td>
+                  <td>{ex.estimated1RM} kg</td>
+                  <td>{ex.estimated1RMRPE !== ex.estimated1RM ? ex.estimated1RMRPE + " kg" : "—"}</td>
+                  <td>{ex.workKcal} kcal</td>
+                  <td>{ex.sessionDurationMin} min</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <Disclaimer type="training" />
+      </section>
+    )}
+
+    <section class="calculator-info">
+      <h2>Sobre esta calculadora</h2>
+      
+      <h3>O que é volume de treino?</h3>
+      <p><strong>Volume de treino (tonelagem)</strong> = Séries × Repetições × Carga. É a métrica principal para quantificar a dose de treinamento resistido.</p>
+
+      <h3>Fórmulas utilizadas</h3>
+      <ul>
+        <li><strong>Volume (tonelagem):</strong> Séries × Repetições × Carga (kg)</li>
+        <li><strong>1RM (Epley):</strong> Carga × (1 + Repetições/30) — válido para 1–30 reps</li>
+        <li><strong>1RM (RPE):</strong> Ajusta o 1RM de Epley baseado em RIR (Repetições na Reserva). Cada RIR ≈ 2,5% de diferença</li>
+        <li><strong>Trabalho mecânico:</strong> Força (N) × Distância (m) × Repetições totais. Distância média ≈ 0,5m por rep (compostos)</li>
+        <li><strong>Duração:</strong> ~45s por série + tempo de descanso configurado</li>
+      </ul>
+
+      <h3>Interpretação do volume</h3>
+      <table>
+        <thead><tr><th>Volume semanal por grupo muscular</th><th>Classificação</th></tr></thead>
+        <tbody>
+          <tr><td>< 10 séries</td><td>Baixo (iniciante/manutenção)</td></tr>
+          <tr><td>10–20 séries</td><td>Moderado (hipertrofia)</td></tr>
+          <tr><td>> 20 séries</td><td>Alto (avançado/especialização)</td></tr>
+        </tbody>
+      </table>
+      <p class="help-text">Referência: Schoenfeld et al. 2017; Krieger 2010. Ajuste por recuperação individual.</p>
+
+      <h3>Limitações</h3>
+      <ul>
+        <li>1RM de Epley superestima em repetições altas (>15) e subestima em avançados</li>
+        <li>Trabalho mecânico é aproximado — não considera alavancas, amplitude de movimento, velocidade</li>
+        <li>RPE é subjetivo; calibração individual melhora precisão</li>
+        <li>Volume não captura intensidade relativa (%1RM), proximidade da falha, tempo sob tensão</li>
+        <li>Não substitui periodização estruturada e acompanhamento profissional</li>
+      </ul>
+    </section>
+
+    <RelatedTools toolIds={["protein-calculator", "calorie-calculator"]} />
+  </article>
+</MainLayout>

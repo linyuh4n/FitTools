@@ -1,24 +1,19 @@
 ---
 /**
- * LGPD Consent Banner
- * Gerencia consentimento para cookies de analytics e ads (GA4, AdSense)
- * Conforme LGPD Art. 7º e 8º - consentimento livre, informado e inequívoco
+ * LGPD Consent Banner - LGPD Art. 7 e 8
  */
-import { SITE_URL } from 'astro:env/client';
-
 const ga4Id = import.meta.env.GA4_MEASUREMENT_ID;
 const adsenseId = import.meta.env.ADSENSE_CLIENT_ID;
 
-const hasAnalytics = ga4Id && ga4Id !== '';
-const hasAds = adsenseId && adsenseId !== '';
+const hasAnalytics = ga4Id && ga4Id !== "";
+const hasAds = adsenseId && adsenseId !== "";
 const shouldShowBanner = hasAnalytics || hasAds;
 ---
 
-<script is:inline>
-  // Consent management - runs immediately on page load
+<script is:inline define:vars={{ hasAnalytics, hasAds, shouldShowBanner, ga4Id, adsenseId }}>
   (function() {
-    const CONSENT_KEY = 'fittools_consent';
-    const CONSENT_VERSION = '1';
+    const CONSENT_KEY = "fittools_consent";
+    const CONSENT_VERSION = "1";
 
     function getConsent() {
       try {
@@ -49,27 +44,27 @@ const shouldShowBanner = hasAnalytics || hasAds;
       window.dataLayer = window.dataLayer || [];
       function gtag() { dataLayer.push(arguments); }
       window.gtag = gtag;
-      gtag('js', new Date());
-      gtag('consent', 'default', {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied'
+      gtag("js", new Date());
+      gtag("consent", "default", {
+        analytics_storage: "denied",
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied"
       });
-      gtag('config', id, { anonymize_ip: true });
+      gtag("config", id, { anonymize_ip: true });
 
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
+      script.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
       document.head.appendChild(script);
     }
 
     function loadAdsense(id) {
       if (!id) return;
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.async = true;
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${id}`;
-      script.crossOrigin = 'anonymous';
+      script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" + id;
+      script.crossOrigin = "anonymous";
       document.head.appendChild(script);
       
       window.adsbygoogle = window.adsbygoogle || [];
@@ -80,56 +75,50 @@ const shouldShowBanner = hasAnalytics || hasAds;
       if (!consent) return;
       
       if (consent.analytics && hasAnalytics) {
-        gtag('consent', 'update', { analytics_storage: 'granted' });
+        gtag("consent", "update", { analytics_storage: "granted" });
       }
       if (consent.ads && hasAds) {
-        gtag('consent', 'update', { 
-          ad_storage: 'granted',
-          ad_user_data: 'granted',
-          ad_personalization: 'granted'
+        gtag("consent", "update", { 
+          ad_storage: "granted",
+          ad_user_data: "granted",
+          ad_personalization: "granted"
         });
-        // Re-trigger adsense if not loaded
         if (window.adsbygoogle) {
           window.adsbygoogle.push({});
         }
       }
     }
 
-    // Initialize on DOM ready
     function init() {
       const consent = getConsent();
       
       if (consent) {
-        // Apply existing consent
         applyConsent(consent);
       } else {
-        // Show banner if analytics or ads are configured
-        if (shouldShowBanner) {
+        if (shouldShowBanner === true) {
           showBanner();
         }
       }
     }
 
     function showBanner() {
-      const banner = document.getElementById('consent-banner');
+      const banner = document.getElementById("consent-banner");
       if (banner) {
         banner.hidden = false;
-        banner.style.display = 'block';
-        // Focus first button for accessibility
-        const acceptBtn = banner.querySelector('[data-consent="accept-all"]');
+        banner.style.display = "block";
+        const acceptBtn = banner.querySelector("[data-consent=accept-all]");
         if (acceptBtn) acceptBtn.focus();
       }
     }
 
     function hideBanner() {
-      const banner = document.getElementById('consent-banner');
+      const banner = document.getElementById("consent-banner");
       if (banner) {
         banner.hidden = true;
-        banner.style.display = 'none';
+        banner.style.display = "none";
       }
     }
 
-    // Expose functions globally for inline handlers
     window.fittoolsConsent = {
       acceptAll: function() {
         const consent = setConsent(true, true);
@@ -147,44 +136,42 @@ const shouldShowBanner = hasAnalytics || hasAds;
         hideBanner();
       },
       showSettings: function() {
-        const modal = document.getElementById('consent-modal');
+        const modal = document.getElementById("consent-modal");
         if (modal) {
           modal.hidden = false;
-          modal.style.display = 'flex';
-          const saveBtn = modal.querySelector('[data-consent="save"]');
+          modal.style.display = "flex";
+          const saveBtn = modal.querySelector("[data-consent=save]");
           if (saveBtn) saveBtn.focus();
         }
       },
       saveSettings: function() {
-        const modal = document.getElementById('consent-modal');
-        const analytics = modal?.querySelector('[data-consent-toggle="analytics"]')?.checked ?? false;
-        const ads = modal?.querySelector('[data-consent-toggle="ads"]')?.checked ?? false;
+        const modal = document.getElementById("consent-modal");
+        const analytics = modal?.querySelector("[data-consent-toggle=analytics]")?.checked ?? false;
+        const ads = modal?.querySelector("[data-consent-toggle=ads]")?.checked ?? false;
         const consent = setConsent(analytics, ads);
         applyConsent(consent);
         if (modal) {
           modal.hidden = true;
-          modal.style.display = 'none';
+          modal.style.display = "none";
         }
         hideBanner();
       },
       closeModal: function() {
-        const modal = document.getElementById('consent-modal');
+        const modal = document.getElementById("consent-modal");
         if (modal) {
           modal.hidden = true;
-          modal.style.display = 'none';
+          modal.style.display = "none";
         }
       }
     };
 
-    // Initialize consent state on page load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
     } else {
       init();
     }
 
-    // Re-apply consent on navigation (Astro view transitions)
-    document.addEventListener('astro:after-swap', function() {
+    document.addEventListener("astro:after-swap", function() {
       const consent = getConsent();
       if (consent) applyConsent(consent);
     });
@@ -207,7 +194,7 @@ const shouldShowBanner = hasAnalytics || hasAds;
           <h3 id="consent-title" style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Privacidade e cookies</h3>
           <p id="consent-description" style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6; margin: 0;">
             Utilizamos cookies essenciais para o funcionamento do site e, com seu consentimento, cookies de 
-            {hasAnalytics && hasAds ? 'analytics e anúncios personalizados' : hasAnalytics ? 'analytics' : 'anúncios personalizados'}
+            {hasAnalytics && hasAds ? "analytics e anuncios personalizados" : hasAnalytics ? "analytics" : "anuncios personalizados"}
             para melhorar sua experiência. 
             <a href="/privacidade/" style="color: var(--color-primary); text-decoration: underline;">Saiba mais</a>.
           </p>
@@ -229,14 +216,14 @@ const shouldShowBanner = hasAnalytics || hasAds;
             style="white-space: nowrap;"
             aria-label="Aceitar apenas cookies essenciais e de analytics"
           >
-            {hasAnalytics ? 'Apenas analytics' : 'Aceitar essenciais'}
+            {hasAnalytics ? "Apenas analytics" : "Aceitar essenciais"}
           </button>
           <button 
             type="button" 
             data-consent="reject-all"
             class="btn btn-outline"
             style="white-space: nowrap;"
-            aria-label="Rejeitar cookies não essenciais"
+            aria-label="Rejeitar cookies nao essenciais"
           >
             Rejeitar
           </button>
@@ -245,9 +232,9 @@ const shouldShowBanner = hasAnalytics || hasAds;
             onclick="fittoolsConsent.showSettings()"
             class="btn btn-sm"
             style="white-space: nowrap; background: transparent; border: none; color: var(--color-text-secondary); padding: var(--space-2);"
-            aria-label="Configurar preferências de cookies"
+            aria-label="Configurar preferencias de cookies"
           >
-            Preferências
+            Preferencias
           </button>
         </div>
       </div>
@@ -269,11 +256,11 @@ const shouldShowBanner = hasAnalytics || hasAds;
       style="background: var(--color-bg); border-radius: var(--radius-lg); max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl);"
     >
       <div style="padding: var(--space-6); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
-        <h2 id="consent-modal-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin: 0;">Preferências de privacidade</h2>
+        <h2 id="consent-modal-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin: 0;">Preferencias de privacidade</h2>
         <button 
           type="button" 
           onclick="fittoolsConsent.closeModal()"
-          aria-label="Fechar janela de preferências"
+          aria-label="Fechar janela de preferencias"
           style="background: none; border: none; font-size: var(--text-2xl); line-height: 1; cursor: pointer; color: var(--color-text-muted); padding: 0;"
         >
           ×
@@ -281,14 +268,14 @@ const shouldShowBanner = hasAnalytics || hasAds;
       </div>
       <div style="padding: var(--space-6);">
         <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-6); line-height: 1.6;">
-          Gerencie suas preferências de cookies. Cookies essenciais não podem ser desativados pois são necessários para o funcionamento do site.
+          Gerencie suas preferencias de cookies. Cookies essenciais nao podem ser desativados pois sao necessarios para o funcionamento do site.
         </p>
         
         <fieldset style="border: none; margin: 0; padding: 0;">
           <legend style="font-weight: var(--font-semibold); margin-bottom: var(--space-4); font-size: var(--text-base);">Cookies essenciais</legend>
           <label style="display: flex; align-items: center; gap: var(--space-3); cursor: default; padding: var(--space-3); background: var(--color-bg-secondary); border-radius: var(--radius-md);">
             <input type="checkbox" checked disabled style="width: 18px; height: 18px; accent-color: var(--color-primary);" />
-            <span style="font-size: var(--text-sm);">Necessários para funcionamento, segurança e acessibilidade</span>
+            <span style="font-size: var(--text-sm);">Necessarios para funcionamento, seguranca e acessibilidade</span>
           </label>
         </fieldset>
 
@@ -296,8 +283,8 @@ const shouldShowBanner = hasAnalytics || hasAds;
           <fieldset style="border: none; margin: var(--space-6) 0 0; padding: 0;">
             <legend style="font-weight: var(--font-semibold); margin-bottom: var(--space-4); font-size: var(--text-base);">Analytics</legend>
             <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer; padding: var(--space-3); background: var(--color-bg-secondary); border-radius: var(--radius-md); transition: background var(--transition-fast);"
-              onmouseover="this.style.background='var(--color-bg-tertiary)'" 
-              onmouseout="this.style.background='var(--color-bg-secondary)'"
+              onmouseover="this.style.background=var(--color-bg-tertiary)" 
+              onmouseout="this.style.background=var(--color-bg-secondary)"
             >
               <input 
                 type="checkbox" 
@@ -306,7 +293,7 @@ const shouldShowBanner = hasAnalytics || hasAds;
               />
               <div>
                 <div style="font-weight: var(--font-medium); font-size: var(--text-sm);">Google Analytics (GA4)</div>
-                <div style="font-size: var(--text-xs); color: var(--color-text-muted);">Coleta dados anônimos de navegação para melhorar o site. IP anonimizado.</div>
+                <div style="font-size: var(--text-xs); color: var(--color-text-muted);">Coleta dados anonimos de navegacao para melhorar o site. IP anonimizado.</div>
               </div>
             </label>
           </fieldset>
@@ -314,10 +301,10 @@ const shouldShowBanner = hasAnalytics || hasAds;
 
         {hasAds && (
           <fieldset style="border: none; margin: var(--space-6) 0 0; padding: 0;">
-            <legend style="font-weight: var(--font-semibold); margin-bottom: var(--space-4); font-size: var(--text-base);">Anúncios personalizados</legend>
+            <legend style="font-weight: var(--font-semibold); margin-bottom: var(--space-4); font-size: var(--text-base);">Anuncios personalizados</legend>
             <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer; padding: var(--space-3); background: var(--color-bg-secondary); border-radius: var(--radius-md); transition: background var(--transition-fast);"
-              onmouseover="this.style.background='var(--color-bg-tertiary)'" 
-              onmouseout="this.style.background='var(--color-bg-secondary)'"
+              onmouseover="this.style.background=var(--color-bg-tertiary)" 
+              onmouseout="this.style.background=var(--color-bg-secondary)"
             >
               <input 
                 type="checkbox" 
@@ -326,7 +313,7 @@ const shouldShowBanner = hasAnalytics || hasAds;
               />
               <div>
                 <div style="font-weight: var(--font-medium); font-size: var(--text-sm);">Google AdSense</div>
-                <div style="font-size: var(--text-xs); color: var(--color-text-muted);">Exibe anúncios personalizados baseados em seus interesses e navegação.</div>
+                <div style="font-size: var(--text-xs); color: var(--color-text-muted);">Exibe anuncios personalizados baseados em seus interesses e navegacao.</div>
               </div>
             </label>
           </fieldset>
@@ -337,7 +324,7 @@ const shouldShowBanner = hasAnalytics || hasAds;
             type="button" 
             onclick="fittoolsConsent.closeModal()"
             class="btn btn-secondary"
-            aria-label="Cancelar e manter configurações atuais"
+            aria-label="Cancelar e manter configuracoes atuais"
           >
             Cancelar
           </button>
@@ -346,9 +333,9 @@ const shouldShowBanner = hasAnalytics || hasAds;
             data-consent="save"
             onclick="fittoolsConsent.saveSettings()"
             class="btn btn-primary"
-            aria-label="Salvar preferências selecionadas"
+            aria-label="Salvar preferencias selecionadas"
           >
-            Salvar preferências
+            Salvar preferencias
           </button>
         </div>
       </div>

@@ -79,7 +79,8 @@ const organizationJsonLd = generateOrganizationJsonLd();
 
     <!-- Fonte Inter (carregamento otimizado) -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media=\
+all\" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
 
     <style>
@@ -89,7 +90,7 @@ const organizationJsonLd = generateOrganizationJsonLd();
     </style>
   </head>
   <body>
-    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    <a href="#main-content" class="skip-link">Pular para o conteudo principal</a>
 
     <Header currentPath={currentPath} />
 
@@ -101,5 +102,18 @@ const organizationJsonLd = generateOrganizationJsonLd();
 
     <!-- LGPD Consent Banner -->
     <ConsentBanner />
+
+    <!-- Service Worker Registration -->
+    <script is:inline>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").then((registration) => {
+            console.log("SW registered: ", registration.scope);
+          }).catch((registrationError) => {
+            console.log("SW registration failed: ", registrationError);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

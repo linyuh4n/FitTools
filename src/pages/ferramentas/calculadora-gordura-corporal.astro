@@ -1,0 +1,361 @@
+---
+import { calculateBodyFat, BodyFatInput } from "@/lib/calculations/bodyfat-calculator";
+import MainLayout from "@/layouts/MainLayout.astro";
+import CalculatorCard from "@/components/CalculatorCard.astro";
+import ResultCard from "@/components/ResultCard.astro";
+import Disclaimer from "@/components/Disclaimer.astro";
+import RelatedTools from "@/components/RelatedTools.astro";
+import { generateCalculatorJsonLd, generateBreadcrumbJsonLd } from "@/lib/seo";
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: "Início", url: "https://fittools.com.br/" },
+  { name: "Ferramentas", url: "https://fittools.com.br/ferramentas/" },
+  { name: "Calculadora de % Gordura Corporal", url: "https://fittools.com.br/ferramentas/calculadora-gordura-corporal/" },
+]);
+
+const calculatorJsonLd = generateCalculatorJsonLd({
+  name: "Calculadora de % Gordura Corporal",
+  description: "Estime seu percentual de gordura corporal usando métodos Navy (circunferências), Jackson-Pollock (dobras cutâneas) ou baseado no IMC. Inclui massa magra, categoria e peso ideal.",
+  url: "https://fittools.com.br/ferramentas/calculadora-gordura-corporal/",
+  calculatorType: "BodyFatCalculator",
+});
+
+interface Props {
+  submitted?: boolean;
+  sex?: "male" | "female";
+  age?: string;
+  heightCm?: string;
+  weightKg?: string;
+  // Navy method
+  neckCm?: string;
+  waistCm?: string;
+  hipCm?: string;
+  // Jackson-Pollock 3-site
+  chestMm?: string;
+  abdomenMm?: string;
+  thighMm?: string;
+  tricepsMm?: string;
+  suprailiacMm?: string;
+  // Jackson-Pollock 7-site
+  axillaMm?: string;
+  subscapularMm?: string;
+}
+
+const {
+  submitted = false,
+  sex = "male",
+  age = "30",
+  heightCm = "175",
+  weightKg = "75",
+  neckCm = "",
+  waistCm = "",
+  hipCm = "",
+  chestMm = "",
+  abdomenMm = "",
+  thighMm = "",
+  tricepsMm = "",
+  suprailiacMm = "",
+  axillaMm = "",
+  subscapularMm = "",
+} = Astro.props;
+
+let result: ReturnType<typeof calculateBodyFat> | null = null;
+let errors: Record<string, string> = {};
+let methodUsed = "bmi-based";
+
+if (submitted) {
+  const a = parseInt(age);
+  const h = parseFloat(heightCm);
+  const w = parseFloat(weightKg);
+
+  if (!age || isNaN(a) || a < 10 || a > 100) errors.age = "Idade: 10–100 anos";
+  if (!heightCm || isNaN(h) || h < 100 || h > 250) errors.heightCm = "Altura: 100–250 cm";
+  if (!weightKg || isNaN(w) || w < 30 || w > 300) errors.weightKg = "Peso: 30–300 kg";
+
+  const n = neckCm ? parseFloat(neckCm) : undefined;
+  const wc = waistCm ? parseFloat(waistCm) : undefined;
+  const hc = hipCm ? parseFloat(hipCm) : undefined;
+  const c = chestMm ? parseFloat(chestMm) : undefined;
+  const ab = abdomenMm ? parseFloat(abdomenMm) : undefined;
+  const th = thighMm ? parseFloat(thighMm) : undefined;
+  const tr = tricepsMm ? parseFloat(tricepsMm) : undefined;
+  const si = suprailiacMm ? parseFloat(suprailiacMm) : undefined;
+  const ax = axillaMm ? parseFloat(axillaMm) : undefined;
+  const sb = subscapularMm ? parseFloat(subscapularMm) : undefined;
+
+  if (n !== undefined && (isNaN(n) || n < 20 || n > 60)) errors.neckCm = "Pescoço: 20–60 cm";
+  if (wc !== undefined && (isNaN(wc) || wc < 50 || wc > 150)) errors.waistCm = "Cintura: 50–150 cm";
+  if (hc !== undefined && (isNaN(hc) || hc < 70 || hc > 180)) errors.hipCm = "Quadril: 70–180 cm";
+  if (c !== undefined && (isNaN(c) || c < 2 || c > 60)) errors.chestMm = "Peitoral: 2–60 mm";
+  if (ab !== undefined && (isNaN(ab) || ab < 2 || ab > 60)) errors.abdomenMm = "Abdominal: 2–60 mm";
+  if (th !== undefined && (isNaN(th) || th < 2 || th > 60)) errors.thighMm = "Coxa: 2–60 mm";
+  if (tr !== undefined && (isNaN(tr) || tr < 2 || tr > 60)) errors.tricepsMm = "Tríceps: 2–60 mm";
+  if (si !== undefined && (isNaN(si) || si < 2 || si > 60)) errors.suprailiacMm = "Supra-ilíaca: 2–60 mm";
+  if (ax !== undefined && (isNaN(ax) || ax < 2 || ax > 60)) errors.axillaMm = "Axilar: 2–60 mm";
+  if (sb !== undefined && (isNaN(sb) || sb < 2 || sb > 60)) errors.subscapularMm = "Subescapular: 2–60 mm";
+
+  if (Object.keys(errors).length === 0) {
+    try {
+      const input: BodyFatInput = {
+        sex,
+        age: a,
+        heightCm: h,
+        weightKg: w,
+        neckCm: n,
+        waistCm: wc,
+        hipCm: hc,
+        chestMm: c,
+        abdomenMm: ab,
+        thighMm: th,
+        tricepsMm: tr,
+        suprailiacMm: si,
+        axillaMm: ax,
+        subscapularMm: sb,
+      };
+      result = calculateBodyFat(input);
+      methodUsed = result.method;
+    } catch (e) {
+      errors.form = e instanceof Error ? e.message : "Erro no cálculo";
+    }
+  }
+}
+
+const methodLabels: Record<string, string> = {
+  "navy": "Método Navy (circunferências: pescoço, cintura, quadril*)",
+  "jackson-pollock-3": "Jackson-Pollock 3 dobras (peitoral/abdominal/coxa ♂ | tríceps/supra-ilíaca/coxa ♀)",
+  "jackson-pollock-7": "Jackson-Pollock 7 dobras (completo)",
+  "bmi-based": "Baseado no IMC (menos preciso, sem medidas)",
+};
+
+const sexLabels: Record<string, string> = {
+  male: "Masculino",
+  female: "Feminino",
+};
+---
+
+<MainLayout
+  title="Calculadora de % Gordura Corporal | FitTools"
+  description="Estime seu percentual de gordura corporal usando métodos Navy (circunferências), Jackson-Pollock (dobras cutâneas) ou baseado no IMC. Inclui massa magra, categoria, LMI e peso ideal."
+  canonical="/ferramentas/calculadora-gordura-corporal/"
+  ogImage="/social/og-bodyfat-calculator.svg"
+  jsonLd={{ "@graph": [calculatorJsonLd, breadcrumbJsonLd] }}
+  currentPath="/ferramentas/"
+>
+  <article class="calculator-page">
+    <header class="page-header">
+      <nav class="breadcrumbs" aria-label="Navegação">
+        <a href="/">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/ferramentas/">Ferramentas</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Calculadora de % Gordura Corporal</span>
+      </nav>
+      <h1>Calculadora de % Gordura Corporal</h1>
+      <p class="page-description">
+        Estime seu percentual de gordura usando métodos validados: Navy (circunferências), Jackson-Pollock (dobras cutâneas 3 ou 7 locais) ou estimativa baseada no IMC.
+        O método mais preciso disponível será usado automaticamente conforme as medidas fornecidas.
+      </p>
+    </header>
+
+    <section class="calculator-form-section" aria-labelledby="form-title">
+      <h2 id="form-title">Seus dados</h2>
+      
+      <form method="GET" action="/ferramentas/calculadora-gordura-corporal/" class="calculator-form">
+        <input type="hidden" name="submitted" value="true" />
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="sex">Sexo biológico *</label>
+            <select id="sex" name="sex" required>
+              <option value="male" selected={sex === "male"}>Masculino</option>
+              <option value="female" selected={sex === "female"}>Feminino</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="age">Idade (anos) *</label>
+            <input type="number" id="age" name="age" min="10" max="100" value={age} required />
+            {errors.age && <p class="error-message" role="alert">{errors.age}</p>}
+          </div>
+
+          <div class="form-group">
+            <label for="heightCm">Altura (cm) *</label>
+            <input type="number" id="heightCm" name="heightCm" step="0.1" min="100" max="250" value={heightCm} required />
+            {errors.heightCm && <p class="error-message" role="alert">{errors.heightCm}</p>}
+          </div>
+
+          <div class="form-group">
+            <label for="weightKg">Peso (kg) *</label>
+            <input type="number" id="weightKg" name="weightKg" step="0.1" min="30" max="300" value={weightKg} required />
+            {errors.weightKg && <p class="error-message" role="alert">{errors.weightKg}</p>}
+          </div>
+        </div>
+
+        <details class="measurements-section open">
+          <summary>Medidas para métodos precisos (opcional, mas recomendado)</summary>
+          <p class="help-text">Preencha o máximo possível. O método mais preciso disponível será usado automaticamente.</p>
+
+          <details class="method-group">
+            <summary><strong>Método Navy (circunferências em cm)</strong> — Requer: pescoço + cintura (+ quadril para mulheres)</summary>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="neckCm">Pescoço (cm) *</label>
+                <input type="number" id="neckCm" name="neckCm" step="0.1" min="20" max="60" value={neckCm} placeholder="Meça abaixo da laringe" />
+                {errors.neckCm && <p class="error-message" role="alert">{errors.neckCm}</p>}
+              </div>
+              <div class="form-group">
+                <label for="waistCm">Cintura (cm) *</label>
+                <input type="number" id="waistCm" name="waistCm" step="0.1" min="50" max="150" value={waistCm} placeholder="Menor circunferência abdominal (geralmente no umbigo)" />
+                {errors.waistCm && <p class="error-message" role="alert">{errors.waistCm}</p>}
+              </div>
+              <div class="form-group" class:hidden={sex !== "female"}>
+                <label for="hipCm">Quadril (cm) * (mulheres)</label>
+                <input type="number" id="hipCm" name="hipCm" step="0.1" min="70" max="180" value={hipCm} placeholder="Maior circunferência do quadril/nádegas" />
+                {errors.hipCm && <p class="error-message" role="alert">{errors.hipCm}</p>}
+              </div>
+            </div>
+          </details>
+
+          <details class="method-group">
+            <summary><strong>Jackson-Pollock 3 dobras (mm)</strong> — Homens: peitoral, abdominal, coxa | Mulheres: tríceps, supra-ilíaca, coxa</summary>
+            <div class="form-grid">
+              <div class="form-group" class:hidden={sex !== "male"}>
+                <label for="chestMm">Peitoral (mm) * (homens)</label>
+                <input type="number" id="chestMm" name="chestMm" step="0.1" min="2" max="60" value={chestMm} placeholder="Dobra diagonal entre axila e mamilo" />
+                {errors.chestMm && <p class="error-message" role="alert">{errors.chestMm}</p>}
+              </div>
+              <div class="form-group">
+                <label for="abdomenMm">Abdominal (mm) *</label>
+                <input type="number" id="abdomenMm" name="abdomenMm" step="0.1" min="2" max="60" value={abdomenMm} placeholder="Vertical, 2cm ao lado do umbigo" />
+                {errors.abdomenMm && <p class="error-message" role="alert">{errors.abdomenMm}</p>}
+              </div>
+              <div class="form-group">
+                <label for="thighMm">Coxa (mm) *</label>
+                <input type="number" id="thighMm" name="thighMm" step="0.1" min="2" max="60" value={thighMm} placeholder="Frontal, meio caminho entre quadril e joelho" />
+                {errors.thighMm && <p class="error-message" role="alert">{errors.thighMm}</p>}
+              </div>
+              <div class="form-group" class:hidden={sex !== "female"}>
+                <label for="tricepsMm">Tríceps (mm) * (mulheres)</label>
+                <input type="number" id="tricepsMm" name="tricepsMm" step="0.1" min="2" max="60" value={tricepsMm} placeholder="Posterior do braço, meio caminho ombro-cotovelo" />
+                {errors.tricepsMm && <p class="error-message" role="alert">{errors.tricepsMm}</p>}
+              </div>
+              <div class="form-group" class:hidden={sex !== "female"}>
+                <label for="suprailiacMm">Supra-ilíaca (mm) * (mulheres)</label>
+                <input type="number" id="suprailiacMm" name="suprailiacMm" step="0.1" min="2" max="60" value={suprailiacMm} placeholder="Diagonal, acima da crista ilíaca" />
+                {errors.suprailiacMm && <p class="error-message" role="alert">{errors.suprailiacMm}</p>}
+              </div>
+            </div>
+          </details>
+
+          <details class="method-group">
+            <summary><strong>Jackson-Pollock 7 dobras (mm)</strong> — Mais preciso, requer adipômetro e técnica padronizada</summary>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="axillaMm">Axilar média (mm) *</label>
+                <input type="number" id="axillaMm" name="axillaMm" step="0.1" min="2" max="60" value={axillaMm} placeholder="Linha axilar média, nível do xifoide" />
+                {errors.axillaMm && <p class="error-message" role="alert">{errors.axillaMm}</p>}
+              </div>
+              <div class="form-group">
+                <label for="subscapularMm">Subescapular (mm) *</label>
+                <input type="number" id="subscapularMm" name="subscapularMm" step="0.1" min="2" max="60" value={subscapularMm} placeholder="Inferior da escápula, 45° diagonal" />
+                {errors.subscapularMm && <p class="error-message" role="alert">{errors.subscapularMm}</p>}
+              </div>
+            </div>
+            <p class="help-text">Para JP7, preencha também as 3 dobras do JP3 acima + axilar + subescapular.</p>
+          </details>
+        </details>
+
+        {errors.form && <div class="form-error" role="alert">{errors.form}</div>}
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg">Calcular % Gordura</button>
+          <a href="/ferramentas/calculadora-gordura-corporal/" class="btn btn-secondary btn-lg">Limpar</a>
+        </div>
+      </form>
+    </section>
+
+    {result && (
+      <section class="calculator-results" aria-labelledby="results-title">
+        <h2 id="results-title">Resultado</h2>
+        
+        <div class="method-badge">
+          <span class="badge">Método usado: {methodLabels[methodUsed] || methodUsed}</span>
+        </div>
+
+        <div class="macro-grid">
+          <ResultCard title="% Gordura Corporal" value={result.bodyFatPercent + "%"} subtitle={result.bodyFatCategory} variant="primary" icon="📊" />
+          <ResultCard title="Massa Gorda" value={result.fatMassKg + " kg"} subtitle={((result.fatMassKg / parseFloat(weightKg)) * 100).toFixed(1) + "% do peso total"} variant="secondary" icon="⚖️" />
+          <ResultCard title="Massa Magra (LBM)" value={result.leanMassKg + " kg"} subtitle={((result.leanMassKg / parseFloat(weightKg)) * 100).toFixed(1) + "% do peso total"} variant="accent" icon="💪" />
+          <ResultCard title="IMC" value={result.bmi} subtitle="Índice de Massa Corporal" variant="secondary" icon="📏" />
+          <ResultCard title="LMI (Índice Massa Magra)" value={result.lmi} subtitle="Massa magra / altura² (kg/m²)" variant="accent" icon="📈" />
+          <ResultCard title="Peso Ideal Estimado" value={result.idealWeightRange.min + "–" + result.idealWeightRange.max + " kg"} subtitle="Faixa para % gordura saudável" variant="primary" icon="🎯" />
+        </div>
+
+        <div class="result-details">
+          <h3>Classificação de referência ({sexLabels[sex]})</h3>
+          <ul>
+            <li><strong>Gordura essencial:</strong> {result.essentialFatPercent}% (mínimo fisiológico)</li>
+            <li><strong>Atleta:</strong> {result.athleteRange}</li>
+            <li><strong>Fitness:</strong> {result.fitnessRange}</li>
+            <li><strong>Médio:</strong> {result.averageRange}</li>
+            <li><strong>Obesidade:</strong> ≥{result.obeseThreshold}%</li>
+          </ul>
+          <p class="help-text">Seu resultado: <strong>{result.bodyFatPercent}%</strong> → <strong>{result.bodyFatCategory}</strong></p>
+        </div>
+
+        <Disclaimer type="general" />
+      </section>
+    )}
+
+    <section class="calculator-info">
+      <h2>Sobre os métodos</h2>
+      
+      <h3>Método Navy (US Navy)</h3>
+      <p>Usa circunferências corporais (fita métrica). Prático, não requer adipômetro.</p>
+      <ul>
+        <li><strong>Homens:</strong> %GC = 495 / (1,0324 − 0,19077 × log10(cintura − pescoço) + 0,15456 × log10(altura)) − 450</li>
+        <li><strong>Mulheres:</strong> %GC = 495 / (1,29579 − 0,35004 × log10(cintura + quadril − pescoço) + 0,22100 × log10(altura)) − 450</li>
+        <li>Precisão: ±3–4% vs DEXA (Hodgdon & Beckett, 1984)</li>
+      </ul>
+
+      <h3>Jackson-Pollock 3 dobras</h3>
+      <p>Usa adipômetro em 3 locais específicos por sexo. Mais preciso que Navy se bem executado.</p>
+      <ul>
+        <li><strong>Homens:</strong> Peitoral (diagonal axila-mamilo), Abdominal (vertical 2cm do umbigo), Coxa (frontal meio quadril-joelho)</li>
+        <li><strong>Mulheres:</strong> Tríceps (posterior braço meio ombro-cotovelo), Supra-ilíaca (diagonal acima crista ilíaca), Coxa (frontal meio quadril-joelho)</li>
+        <li>Equação de densidade corporal → %GC = (495 / densidade) − 450 (Siri)</li>
+        <li>Precisão: ±3–5% vs DEXA</li>
+      </ul>
+
+      <h3>Jackson-Pollock 7 dobras</h3>
+      <p>Adiciona axilar média, subescapular. Mais completo, exige técnica rigorosa.</p>
+
+      <h3>Baseado no IMC (Deurenberg)</h3>
+      <p>Estimativa quando não há medidas: %GC = 1,20 × IMC + 0,23 × idade − 10,8 × sexo − 5,4. Precisão: ±5–8%.</p>
+
+      <h3>Massa Magra e LMI</h3>
+      <ul>
+        <li><strong>LBM (Lean Body Mass):</strong> Peso total − Massa gorda</li>
+        <li><strong>LMI:</strong> LBM / altura² (kg/m²). Referência: Homens >19, Mulheres >15 (baixo risco sarcopenia)</li>
+      </ul>
+
+      <h3>Limitações importantes</h3>
+      <ul>
+        <li>Todos são <strong>estimativas</strong> — DEXA, hidrodensitometria ou ADP (Bod Pod) são padrão ouro</li>
+        <li>Adipômetro requer técnica padronizada (mesmo avaliador, locais marcados, média de 2–3 medidas)</li>
+        <li>Fórmulas validadas em populações específicas — erro maior em atletas extremos, idosos, obesidade mórbida</li>
+        <li>Hidratação, alimentação recente e hora do dia afetam circunferências</li>
+        <li>Não substitui avaliação profissional com nutricionista/educador físico</li>
+      </ul>
+
+      <h3>Como medir corretamente</h3>
+      <ul>
+        <li><strong>Circunferências:</strong> Fita métrica flexível, paralela ao solo, sem comprimir a pele</li>
+        <li><strong>Dobras:</strong> Adipômetro calibrado, pinça 1cm acima do local, leitura em 2–4s, média de 2 medidas</li>
+        <li><strong>Condições:</strong> Jejum 4h, sem exercício 12h, bexiga vazia, mesmo horário</li>
+      </ul>
+    </section>
+
+    <RelatedTools toolIds={["bmi-calculator", "calorie-calculator", "protein-calculator"]} />
+  </article>
+</MainLayout>

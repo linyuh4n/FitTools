@@ -1,0 +1,671 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import ResultCard from '@/components/ResultCard.astro';
+import Disclaimer from '@/components/Disclaimer.astro';
+import RelatedTools from '@/components/RelatedTools.astro';
+import { calculateProtein, validateProteinInput, getGoalLabel, getDietPreferenceLabel, getReferences } from '@/lib/calculations/protein';
+import { generateCalculatorJsonLd, generateBreadcrumbJsonLd } from '@/lib/seo';
+import type { ProteinCalculatorInput, ProteinCalculatorResult } from '@/types';
+
+const calculatorJsonLd = generateCalculatorJsonLd({
+  name: 'Calculadora de Proteínas',
+  description: 'Calcule sua necessidade diária de proteína baseada no peso, objetivo e preferência alimentar.',
+  url: 'https://fittools.com.br/ferramentas/calculadora-proteina/',
+  category: 'HealthApplication',
+});
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: 'Início', url: 'https://fittools.com.br/' },
+  { name: 'Ferramentas', url: 'https://fittools.com.br/ferramentas/' },
+  { name: 'Calculadora de Proteínas', url: 'https://fittools.com.br/ferramentas/calculadora-proteina/' },
+]);
+---
+
+<MainLayout
+  title="Calculadora de Proteínas - FitTools"
+  description="Calcule sua necessidade diária de proteína baseada no peso corporal, objetivo (saúde, atividade física, hipertrofia) e preferência alimentar. Gratuita, sem cadastro, baseada em ciência."
+  canonical="/ferramentas/calculadora-proteina/"
+  jsonLd={{ '@graph': [calculatorJsonLd, breadcrumbJsonLd] }}
+  currentPath="/ferramentas/calculadora-proteina/"
+>
+  <div class="calculator-page">
+    <header class="calculator-header container">
+      <Breadcrumbs items={[
+        { label: 'Início', href: '/' },
+        { label: 'Ferramentas', href: '/ferramentas/' },
+        { label: 'Calculadora de Proteínas' },
+      ]} />
+
+      <h1 class="calculator-title">Calculadora de Proteínas</h1>
+      <p class="calculator-description">
+        Estime sua necessidade diária de proteína com base no peso corporal, objetivo e preferência alimentar.
+        Baseado nas recomendações da EFSA, ISSN, ACSM e Ministério da Saúde.
+      </p>
+    </header>
+
+    <div class="calculator-content container">
+      <!-- Form Section -->
+      <section class="calculator-form-section" aria-labelledby="form-title">
+        <div class="card calculator-form-card">
+          <h2 id="form-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">Seus dados</h2>
+
+          <form id="protein-form" class="calculator-form" novalidate>
+            <!-- Peso -->
+            <div class="form-field">
+              <label for="weight" class="form-label">Peso corporal (kg) <span aria-hidden="true">*</span></label>
+              <div class="number-input-wrapper">
+                <input
+                  type="number"
+                  id="weight"
+                  name="weight"
+                  class="form-input"
+                  placeholder="Ex: 70"
+                  step="0.1"
+                  min="20"
+                  max="300"
+                  required
+                  aria-describedby="weight-hint"
+                />
+                <span class="number-input-unit" aria-hidden="true">kg</span>
+              </div>
+              <span id="weight-hint" class="form-hit">Seu peso atual em quilogramas</span>
+              <span id="weight-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Objetivo -->
+            <fieldset class="form-field">
+              <legend class="form-label">Objetivo <span aria-hidden="true">*</span></legend>
+              <div class="radio-group" role="radiogroup" aria-label="Selecione seu objetivo">
+                <label class="radio-option">
+                  <input type="radio" name="goal" value="health" required />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Saúde geral / manutenção</span>
+                  <span class="radio-description">~0,8–1,0 g/kg/dia — Referência EFSA para adultos saudáveis</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="goal" value="active" />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Manutenção com atividade física</span>
+                  <span class="radio-description">~1,0–1,4 g/kg/dia — Atividade física regular</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="goal" value="hypertrophy" />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Hipertrofia / ganho de massa muscular</span>
+                  <span class="radio-description">~1,6–2,2 g/kg/dia — Treinamento resistido (ISSN/ACSM)</span>
+                </label>
+              </div>
+              <span id="goal-error" class="form-error" aria-live="polite"></span>
+            </fieldset>
+
+            <!-- Preferência alimentar -->
+            <div class="form-field">
+              <label for="dietPreference" class="form-label">Preferência alimentar <span aria-hidden="true">*</span></label>
+              <select id="dietPreference" name="dietPreference" class="form-input" required aria-describedby="diet-hint">
+                <option value="">Selecione</option>
+                <option value="omnivore">Onívora (inclui carnes, ovos, laticínios)</option>
+                <option value="vegetarian">Vegetariana (ovos e laticínios)</option>
+                <option value="vegan">Vegetariana estrita / Vegana</option>
+              </select>
+              <span id="diet-hint" class="form-hint">Altera apenas os exemplos de alimentos sugeridos, não a necessidade proteica</span>
+              <span id="dietPreference-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Refeições por dia (opcional) -->
+            <div class="form-field">
+              <label for="mealsPerDay" class="form-label">Refeições por dia (opcional)</label>
+              <div class="number-input-wrapper">
+                <input
+                  type="number"
+                  id="mealsPerDay"
+                  name="mealsPerDay"
+                  class="form-input"
+                  placeholder="Ex: 4"
+                  step="1"
+                  min="1"
+                  max="10"
+                  aria-describedby="meals-hint"
+                />
+                <span class="number-input-unit" aria-hidden="true">refeições</span>
+              </div>
+              <span id="meals-hint" class="form-hint">Para estimar proteína por refeição</span>
+              <span id="mealsPerDay-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Ações -->
+            <div class="calculator-form-actions">
+              <button type="submit" class="btn btn-primary btn-lg" id="calculate-btn">
+                Calcular
+              </button>
+              <button type="button" class="btn btn-secondary btn-lg" id="clear-btn">
+                Limpar
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="calculator-results-section" aria-labelledby="results-title" aria-live="polite">
+        <div class="card calculator-form-card" id="results-container" style="display: none;">
+          <h2 id="results-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">Resultado</h2>
+
+          <div id="result-card-container">
+            <!-- ResultCard será inserido aqui via JS -->
+          </div>
+
+          <div class="calculator-form-actions" style="margin-top: var(--space-6);">
+            <button type="button" class="btn btn-outline share-btn" id="share-btn" aria-label="Compartilhar resultado">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              Compartilhar
+            </button>
+            <button type="button" class="btn btn-secondary" id="print-btn" aria-label="Imprimir resultado">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <!-- Estado vazio -->
+        <div id="empty-state" class="card calculator-form-card" style="text-align: center; padding: var(--space-12);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto var(--space-4); color: var(--color-text-muted);" aria-hidden="true">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">Preencha o formulário</h3>
+          <p style="color: var(--color-text-secondary);">Insira seus dados acima para ver sua necessidade estimada de proteína.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Metodologia -->
+    <section class="methodology container" aria-labelledby="methodology-title">
+      <h2 id="methodology-title" class="methodology-title">Como funciona</h2>
+
+      <div class="methodology-grid">
+        <article class="methodology-card">
+          <h3 class="methodology-card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+            Faixas baseadas em evidências
+          </h3>
+          <div class="methodology-card-content">
+            <p>A calculadora apresenta uma <strong>faixa de ingestão (mínimo–máximo)</strong> em g/kg/dia, não um valor único. Isso reflete a variabilidade individual real.</p>
+            <ul style="list-style: disc; margin-left: var(--space-6); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary);">
+              <li><strong>Saúde geral:</strong> 0,8–1,0 g/kg/dia (EFSA PRI, Ministério da Saúde)</li>
+              <li><strong>Atividade física:</strong> 1,0–1,4 g/kg/dia (ACSM, ISSN)</li>
+              <li><strong>Hipertrofia:</strong> 1,6–2,2 g/kg/dia (ISSN Position Stand 2017, ACSM)</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="methodology-card">
+          <h3 class="methodology-card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Preferência alimentar
+          </h3>
+          <div class="methodology-card-content">
+            <p>A preferência <strong>não altera a necessidade proteica calculada</strong>. Ela serve apenas para personalizar os exemplos de alimentos sugeridos no resultado.</p>
+            <p style="margin-top: var(--space-2);">Fontes onívoras, vegetarianas (ovo/laticínios) e veganas são filtradas da base TACO/TBCA.</p>
+          </div>
+        </article>
+
+        <article class="methodology-card">
+          <h3 class="methodology-card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Base de alimentos (TACO/TBCA)
+          </h3>
+          <div class="methodology-card-content">
+            <p>Valores de proteína por 100g baseados na <strong>Tabela Brasileira de Composição de Alimentos (TACO 4ª ed.)</strong> e <strong>TBCA</strong>.</p>
+            <p style="margin-top: var(--space-2);">Cada item especifica o estado do alimento (cru, cozido, drenado, preparado) e tamanho de porção típico.</p>
+          </div>
+        </article>
+
+        <article class="methodology-card">
+          <h3 class="methodology-card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            Privacidade
+          </h3>
+          <div class="methodology-card-content">
+            <p>Cálculos rodam <strong>100% no seu navegador</strong>. Nenhum dado (peso, objetivo, resultado) é enviado a servidores.</p>
+            <p style="margin-top: var(--space-2);">Veja nossa <a href="/privacidade/" style="font-weight: var(--font-medium);">Política de Privacidade</a>.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="methodology-references">
+        <h3 class="methodology-references-title">Referências científicas</h3>
+        <ul class="methodology-references-list">
+          <li>EFSA Panel on Dietetic Products, Nutrition and Allergies (NDA). Dietary Reference Values for protein. EFSA Journal 2012;10(2):2557.</li>
+          <li>Jäger R, et al. International Society of Sports Nutrition Position Stand: protein and exercise. J Int Soc Sports Nutr. 2017;14:20.</li>
+          <li>Thomas DT, et al. Position of the Academy of Nutrition and Dietetics, Dietitians of Canada, and ACSM: Nutrition and Athletic Performance. Med Sci Sports Exerc. 2016;48(3):543-568.</li>
+          <li>Ministério da Saúde. Guia Alimentar para a População Brasileira. 2ª ed. Brasília: Ministério da Saúde; 2014.</li>
+          <li>TACO - Tabela Brasileira de Composição de Alimentos. 4ª edição. NEPA/UNICAMP.</li>
+          <li>TBCA - Tabela de Composição de Alimentos. IBGE/USP.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq container" aria-labelledby="faq-title">
+      <h2 id="faq-title" class="faq-title">Perguntas frequentes</h2>
+
+      <div class="accordion">
+        <details class="accordion-item">
+          <summary class="accordion-trigger" aria-expanded="false">
+            A calculadora serve para crianças ou idosos?
+            <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <div class="accordion-content">
+            <p>Não. As referências usadas (EFSA, ISSN, ACSM) são para <strong>adultos saudáveis</strong>. Crianças, adolescentes, idosos e gestantes têm necessidades diferentes e devem ser avaliados por profissional.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-trigger" aria-expanded="false">
+            Tenho doença renal. Posso usar esta calculadora?
+            <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <div class="accordion-content">
+            <p><strong>Não.</strong> Pessoas com doença renal ou outras condições clínicas devem buscar orientação de médico ou nutricionista. O excesso de proteína pode ser prejudicial nesses casos.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-trigger" aria-expanded="false">
+            A preferência vegetariana/vegana reduz a necessidade de proteína?
+            <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <div class="accordion-content">
+            <p><strong>Não.</strong> A necessidade proteica em g/kg/dia é a mesma. A diferença é que proteínas vegetais podem ter menor digestibilidade e perfil de aminoácidos diferente, o que pode exigir maior variedade e/ou quantidade total. A calculadora apenas filtra os exemplos de alimentos.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-trigger" aria-expanded="false">
+            Posso confiar apenas nessa calculadora para minha dieta?
+            <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <div class="accordion-content">
+            <p>Esta calculadora fornece uma <strong>estimativa populacional</strong>. Necessidades individuais variam por genética, composição corporal, intensidade do treino, qualidade do sono, estresse, etc. Use como ponto de partida e ajuste com acompanhamento profissional.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-trigger" aria-expanded="false">
+            Como distribuir a proteína ao longo do dia?
+            <svg class="accordion-icon" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <div class="accordion-content">
+            <p>A evidência sugere distribuir a proteína em <strong>3–5 refeições</strong> com ~0,3–0,5 g/kg por refeição para otimizar síntese proteica muscular. Se informar o número de refeições, a calculadora mostra a estimativa por refeição.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Disclaimer -->
+    <Disclaimer type="nutrition" />
+
+    <!-- Related Tools -->
+    <RelatedTools toolIds={['bmi-calculator', 'calorie-calculator']} title="Outras calculadoras úteis" />
+  </div>
+
+  <script>
+    // Client-side protein calculator logic
+    (function() {
+      'use strict';
+
+      const form = document.getElementById('protein-form');
+      const calculateBtn = document.getElementById('calculate-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const shareBtn = document.getElementById('share-btn');
+      const printBtn = document.getElementById('print-btn');
+      const resultsContainer = document.getElementById('results-container');
+      const resultCardContainer = document.getElementById('result-card-container');
+      const emptyState = document.getElementById('empty-state');
+
+      let lastResult = null;
+
+      // Validation functions (mirror server-side)
+      function validateField(name, value) {
+        const errors = {};
+
+        if (name === 'weight') {
+          const num = parseFloat(value);
+          if (isNaN(num) || value === '') errors.weight = 'Peso é obrigatório';
+          else if (num < 20 || num > 300) errors.weight = 'Peso deve estar entre 20 e 300 kg';
+        }
+
+        if (name === 'goal') {
+          if (!['health', 'active', 'hypertrophy'].includes(value)) errors.goal = 'Objetivo inválido';
+        }
+
+        if (name === 'dietPreference') {
+          if (!['omnivore', 'vegetarian', 'vegan'].includes(value)) errors.dietPreference = 'Preferência alimentar inválida';
+        }
+
+        if (name === 'mealsPerDay' && value !== '') {
+          const num = parseInt(value, 10);
+          if (isNaN(num)) errors.mealsPerDay = 'Número de refeições deve ser um número válido';
+          else if (num < 1 || num > 10) errors.mealsPerDay = 'Número de refeições deve estar entre 1 e 10';
+        }
+
+        return errors;
+      }
+
+      function showError(fieldName, message) {
+        const errorEl = document.getElementById(`${fieldName}-error`);
+        const inputEl = document.getElementById(fieldName);
+        if (errorEl) {
+          errorEl.textContent = message;
+          errorEl.style.display = 'block';
+        }
+        if (inputEl) {
+          inputEl.setAttribute('aria-invalid', 'true');
+        }
+      }
+
+      function clearError(fieldName) {
+        const errorEl = document.getElementById(`${fieldName}-error`);
+        const inputEl = document.getElementById(fieldName);
+        if (errorEl) {
+          errorEl.textContent = '';
+          errorEl.style.display = 'none';
+        }
+        if (inputEl) {
+          inputEl.removeAttribute('aria-invalid');
+        }
+      }
+
+      function clearAllErrors() {
+        ['weight', 'goal', 'dietPreference', 'mealsPerDay'].forEach(clearError);
+      }
+
+      function formatNumber(num, decimals = 0) {
+        return new Intl.NumberFormat('pt-BR', {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        }).format(num);
+      }
+
+      function formatProteinPerKg(val) {
+        return val.toFixed(1).replace('.', ',') + ' g/kg/dia';
+      }
+
+      function calculate() {
+        const formData = new FormData(form);
+        const input = {
+          weight: parseFloat(formData.get('weight')),
+          goal: formData.get('goal'),
+          dietPreference: formData.get('dietPreference'),
+          mealsPerDay: formData.get('mealsPerDay') ? parseInt(formData.get('mealsPerDay'), 10) : undefined,
+        };
+
+        // Validate
+        clearAllErrors();
+        let hasErrors = false;
+
+        Object.entries(input).forEach(([key, value]) => {
+          if (value !== undefined) {
+            const errors = validateField(key, value);
+            if (errors[key]) {
+              showError(key, errors[key]);
+              hasErrors = true;
+            }
+          }
+        });
+
+        if (hasErrors) {
+          // Focus first error
+          const firstError = form.querySelector('[aria-invalid="true"]');
+          firstError?.focus();
+          return;
+        }
+
+        // Calculate (mirror server logic)
+        const range = calculateRange(input.goal);
+        const grams = calculateGrams(input.weight, range);
+        const perMeal = input.mealsPerDay ? calculatePerMeal(grams.average, input.mealsPerDay) : undefined;
+        const foods = getTopFoods(input.dietPreference, 8);
+
+        const result = {
+          ...input,
+          range,
+          minGramsPerDay: grams.min,
+          maxGramsPerDay: grams.max,
+          averageGramsPerDay: grams.average,
+          perMeal,
+          foods,
+        };
+
+        lastResult = result;
+        renderResult(result);
+        showResults();
+      }
+
+      function calculateRange(goal) {
+        let minGPerKg, maxGPerKg;
+        switch (goal) {
+          case 'health': minGPerKg = 0.8; maxGPerKg = 1.0; break;
+          case 'active': minGPerKg = 1.0; maxGPerKg = 1.4; break;
+          case 'hypertrophy': minGPerKg = 1.6; maxGPerKg = 2.2; break;
+        }
+        return { min: Math.round(minGPerKg * 10) / 10, max: Math.round(maxGPerKg * 10) / 10 };
+      }
+
+      function calculateGrams(weight, range) {
+        const min = Math.round(weight * range.min);
+        const max = Math.round(weight * range.max);
+        const avg = Math.round((min + max) / 2);
+        return { min, max, average: avg };
+      }
+
+      function calculatePerMeal(total, meals) {
+        return Math.round(total / meals);
+      }
+
+      function getTopFoods(preference, limit) {
+        // This would ideally come from the food database
+        // For now, return a static subset matching the preference
+        const allFoods = [
+          { name: 'Peito de frango (cozido)', proteinPer100g: 32.0, servingSize: 100, servingUnit: 'g', state: 'cozido', category: 'Carnes' },
+          { name: 'Ovo de galinha (inteiro)', proteinPer100g: 13.0, servingSize: 50, servingUnit: 'g', state: 'cru', category: 'Ovos' },
+          { name: 'Iogurte grego natural', proteinPer100g: 10.0, servingSize: 100, servingUnit: 'g', state: 'preparado', category: 'Laticínios' },
+          { name: 'Tofu firme', proteinPer100g: 8.0, servingSize: 100, servingUnit: 'g', state: 'preparado', category: 'Derivados de soja' },
+          { name: 'Lentilha (cozida)', proteinPer100g: 9.1, servingSize: 100, servingUnit: 'g', state: 'cozida', category: 'Leguminosas' },
+          { name: 'Grão-de-bico (cozido)', proteinPer100g: 8.9, servingSize: 100, servingUnit: 'g', state: 'cozido', category: 'Leguminosas' },
+          { name: 'Queijo cottage', proteinPer100g: 12.0, servingSize: 50, servingUnit: 'g', state: 'preparado', category: 'Laticínios' },
+          { name: 'Tempê', proteinPer100g: 19.0, servingSize: 100, servingUnit: 'g', state: 'preparado', category: 'Derivados de soja' },
+          { name: 'Salmão (cozido)', proteinPer100g: 25.0, servingSize: 100, servingUnit: 'g', state: 'cozido', category: 'Peixes' },
+          { name: 'Aveia em flocos', proteinPer100g: 13.5, servingSize: 40, servingUnit: 'g', state: 'cru', category: 'Cereais' },
+        ];
+
+        let filtered = allFoods;
+        if (preference === 'vegan') {
+          filtered = allFoods.filter(f => !['Carnes', 'Peixes', 'Ovos', 'Laticínios'].includes(f.category));
+        } else if (preference === 'vegetarian') {
+          filtered = allFoods.filter(f => !['Carnes', 'Peixes'].includes(f.category));
+        }
+
+        return filtered
+          .sort((a, b) => b.proteinPer100g - a.proteinPer100g)
+          .slice(0, limit);
+      }
+
+      function getGoalLabel(goal) {
+        const labels = {
+          health: 'Saúde geral / manutenção',
+          active: 'Manutenção com atividade física',
+          hypertrophy: 'Hipertrofia / ganho de massa muscular',
+        };
+        return labels[goal] || goal;
+      }
+
+      function getDietLabel(pref) {
+        const labels = {
+          omnivore: 'Onívora',
+          vegetarian: 'Vegetariana (ovos e laticínios)',
+          vegan: 'Vegetariana estrita / Vegana',
+        };
+        return labels[pref] || pref;
+      }
+
+      function renderResult(result) {
+        const foodItems = result.foods.map(food => `
+          <div class="result-food-item">
+            <div class="result-food-info">
+              <span class="result-food-name">${food.name}</span>
+              <span class="result-food-serving">
+                ${formatNumber(food.servingSize)} ${food.servingUnit} (${food.state}) = ${(food.proteinPer100g * food.servingSize / 100).toFixed(1).replace('.', ',')} g proteína
+              </span>
+            </div>
+            <span class="result-food-protein">${food.proteinPer100g.toFixed(1).replace('.', ',')} g/100g</span>
+          </div>
+        `).join('');
+
+        resultCardContainer.innerHTML = `
+          <div class="result-main">
+            <div class="result-value">${formatNumber(result.averageGramsPerDay)}</div>
+            <span class="result-unit">g/dia</span>
+            <div class="result-range">
+              <div class="result-range-item">
+                <span class="result-range-label">Mínimo</span>
+                <span class="result-range-value">${formatNumber(result.minGramsPerDay)} g</span>
+              </div>
+              <div class="result-range-item">
+                <span class="result-range-label">Máximo</span>
+                <span class="result-range-value">${formatNumber(result.maxGramsPerDay)} g</span>
+              </div>
+            </div>
+            <div class="result-range">
+              <div class="result-range-item">
+                <span class="result-range-label">Faixa g/kg/dia</span>
+                <span class="result-range-value">${formatProteinPerKg(result.range.min)} – ${formatProteinPerKg(result.range.max)}</span>
+              </div>
+            </div>
+            ${result.perMeal ? `
+              <div class="protein-per-meal">
+                <span class="protein-per-meal-label">Por refeição (${result.perMeal} refeições):</span>
+                <span class="protein-per-meal-value">${formatNumber(result.perMeal)} g</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="result-details">
+            <div class="result-detail">
+              <span class="result-detail-label">Peso informado</span>
+              <span class="result-detail-value">${formatNumber(result.weight, 1)} kg</span>
+            </div>
+            <div class="result-detail">
+              <span class="result-detail-label">Objetivo</span>
+              <span class="result-detail-value">${getGoalLabel(result.goal)}</span>
+            </div>
+            <div class="result-detail">
+              <span class="result-detail-label">Preferência</span>
+              <span class="result-detail-value">${getDietLabel(result.dietPreference)}</span>
+            </div>
+            ${result.mealsPerDay ? `
+              <div class="result-detail">
+                <span class="result-detail-label">Refeições/dia</span>
+                <span class="result-detail-value">${result.mealsPerDay}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          ${result.foods.length > 0 ? `
+            <div class="result-foods">
+              <h3 class="result-foods-title">Exemplos de fontes de proteína</h3>
+              <div class="result-foods-grid">
+                ${foodItems}
+              </div>
+            </div>
+          ` : ''}
+        `;
+      }
+
+      function showResults() {
+        emptyState.style.display = 'none';
+        resultsContainer.style.display = 'block';
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function clearForm() {
+        form.reset();
+        clearAllErrors();
+        emptyState.style.display = 'block';
+        resultsContainer.style.display = 'none';
+        lastResult = null;
+      }
+
+      async function shareResult() {
+        if (!lastResult) return;
+
+        const text = `Minha necessidade de proteína: ${lastResult.minGramsPerDay}–${lastResult.maxGramsPerDay} g/dia (${lastResult.range.min}–${lastResult.range.max} g/kg/dia) para ${getGoalLabel(lastResult.goal).toLowerCase()}. Calculado no FitTools: https://fittools.com.br/ferramentas/calculadora-proteina/`;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Minha necessidade de proteína - FitTools',
+              text: text,
+              url: window.location.href,
+            });
+          } catch (e) {
+            // User cancelled or error
+          }
+        } else {
+          // Fallback: copy to clipboard
+          try {
+            await navigator.clipboard.writeText(text);
+            shareBtn.textContent = 'Copiado!';
+            setTimeout(() => { shareBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg> Compartilhar'; }, 2000);
+          } catch (e) {
+            // Clipboard API failed
+          }
+        }
+      }
+
+      function printResult() {
+        window.print();
+      }
+
+      // Event listeners
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        calculate();
+      });
+
+      clearBtn.addEventListener('click', clearForm);
+      shareBtn.addEventListener('click', shareResult);
+      printBtn.addEventListener('click', printResult);
+
+      // Clear error on input
+      form.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', () => clearError(el.id));
+        el.addEventListener('change', () => clearError(el.id));
+      });
+
+      // Real-time validation on blur
+      form.querySelectorAll('input[required], select[required]').forEach(el => {
+        el.addEventListener('blur', () => {
+          const errors = validateField(el.name, el.value);
+          if (errors[el.name]) {
+            showError(el.name, errors[el.name]);
+          } else {
+            clearError(el.name);
+          }
+        });
+      });
+    })();
+  </script>
+</MainLayout>

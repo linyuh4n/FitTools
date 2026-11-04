@@ -1,0 +1,182 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Hero from '@/components/Hero.astro';
+import CalculatorCard from '@/components/CalculatorCard.astro';
+import ArticleCard from '@/components/ArticleCard.astro';
+import AdPlaceholder from '@/components/AdPlaceholder.astro';
+import { tools } from '@/data/tools';
+import { foodDatabase, getFoodsByDietPreference } from '@/data/foods';
+import { generateOrganizationJsonLd } from '@/lib/seo';
+import type { BlogPost } from '@/types';
+
+const featuredTools = tools.slice(0, 3);
+
+// Artigos recentes (mock - serão substituídos por conteúdo real do blog)
+const recentPosts: BlogPost[] = [
+  {
+    slug: 'quanta-proteina-consumir-por-dia',
+    title: 'Quanta proteína consumir por dia?',
+    description: 'Entenda as recomendações baseadas em ciência para diferentes objetivos: saúde, atividade física e hipertrofia.',
+    pubDate: new Date('2024-01-15'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'proteina-vegetal-melhores-fontes',
+    title: 'Proteína vegetal: quais são as melhores fontes?',
+    description: 'Conheça as melhores fontes de proteína vegetal e como combiná-las para obter todos os aminoácidos essenciais.',
+    pubDate: new Date('2024-01-20'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'lentilha-proteina',
+    title: 'Lentilha tem quanta proteína?',
+    description: 'Valor nutricional da lentilha cozida, como preparar e incluir na dieta para aumentar o consumo de proteína vegetal.',
+    pubDate: new Date('2024-01-25'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+];
+
+// Alimentos destaque para a home
+const featuredFoods = getFoodsByDietPreference('omnivore')
+  .sort((a, b) => b.proteinPer100g - a.proteinPer100g)
+  .slice(0, 8);
+---
+
+<MainLayout
+  title="FitTools - Ferramentas Gratuitas para Fitness e Nutrição"
+  description="Calculadoras gratuitas de proteína, IMC, calorias e mais. Ferramentas baseadas em ciência para sua evolução fitness. Sem cadastro, privacidade garantida."
+  currentPath="/"
+>
+  <Hero />
+
+  <section class="section" aria-labelledby="tools-title">
+    <div class="container">
+      <header>
+        <h2 id="tools-title" class="section-title">Ferramentas populares</h2>
+        <p class="section-subtitle">Calculadoras gratuitas, sem cadastro, com base em referências científicas.</p>
+      </header>
+      <div class="grid grid-3 gap-6">
+        {featuredTools.map((tool) => (
+          <CalculatorCard tool={tool} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <AdPlaceholder slot="home-middle" minHeight={90} />
+
+  <section class="section" style="background-color: var(--color-bg-secondary);" aria-labelledby="benefits-title">
+    <div class="container">
+      <header>
+        <h2 id="benefits-title" class="section-title">Por que usar o FitTools?</h2>
+      </header>
+      <div class="grid grid-2 gap-6">
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Gratuito para sempre</h3>
+          <p style="color: var(--color-text-secondary);">Todas as ferramentas são 100% gratuitas. Sem assinaturas, sem trials, sem pegadinhas.</p>
+        </article>
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Privacidade primeiro</h3>
+          <p style="color: var(--color-text-secondary);">Seus dados não saem do seu navegador. Não coletamos peso, altura ou informações pessoais.</p>
+        </article>
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Resultados instantâneos</h3>
+          <p style="color: var(--color-text-secondary);">Cálculos realizados no navegador. Sem espera, sem carregamento de servidor.</p>
+        </article>
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Baseado em ciência</h3>
+          <p style="color: var(--color-text-secondary);">Referências: EFSA, ISSN, ACSM, Ministério da Saúde. Metodologia transparente.</p>
+        </article>
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Sem cadastro</h3>
+          <p style="color: var(--color-text-secondary);">Use quantas vezes quiser, sem criar conta, sem e-mail, sem login.</p>
+        </article>
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Mobile-first</h3>
+          <p style="color: var(--color-text-secondary);">Experiência otimizada para celular, tablet e desktop.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="foods-title">
+    <div class="container">
+      <header>
+        <h2 id="foods-title" class="section-title">Fontes de proteína em destaque</h2>
+        <p class="section-subtitle">Valores por 100g do alimento no estado indicado. Baseado na TACO e TBCA.</p>
+      </header>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Alimento</th>
+              <th>Categoria</th>
+              <th>Proteína/100g</th>
+              <th>Porção</th>
+              <th>Proteína/porção</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {featuredFoods.map((food) => (
+              <tr>
+                <td><strong>{food.name}</strong></td>
+                <td>{food.category}</td>
+                <td>{food.proteinPer100g.toFixed(1).replace('.', ',')} g</td>
+                <td>{food.servingSize} {food.servingUnit}</td>
+                <td><strong>{(food.proteinPer100g * food.servingSize / 100).toFixed(1).replace('.', ',')} g</strong></td>
+                <td>{food.state}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-text-secondary);">
+        <a href="/nutricao/fontes-proteina/" style="font-weight: var(--font-medium);">Ver todas as fontes de proteína →</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" style="background-color: var(--color-bg-secondary);" aria-labelledby="blog-title">
+    <div class="container">
+      <header>
+        <h2 id="blog-title" class="section-title">Artigos recentes</h2>
+        <p class="section-subtitle">Conteúdo baseado em evidências para sua evolução.</p>
+      </header>
+      <div class="grid grid-3 gap-6">
+        {recentPosts.map((post) => (
+          <ArticleCard post={post} />
+        ))}
+      </div>
+      <div style="text-align: center; margin-top: var(--space-8);">
+        <a href="/blog/" class="btn btn-outline">Ver todos os artigos</a>
+      </div>
+    </div>
+  </section>
+</MainLayout>

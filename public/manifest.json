@@ -1,0 +1,21 @@
+{
+  "name": "FitTools - Ferramentas Gratuitas para Fitness",
+  "short_name": "FitTools",
+  "description": "Calculadoras gratuitas de proteína, IMC, calorias e mais. Baseadas em ciência, sem cadastro, privacidade garantida.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a36a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

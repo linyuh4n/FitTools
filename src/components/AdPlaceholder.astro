@@ -1,0 +1,27 @@
+---
+interface Props {
+  slot?: string;
+  minHeight?: number;
+  disabled?: boolean;
+}
+
+const { slot = 'default', minHeight = 90, disabled = true } = Astro.props;
+---
+
+<div class="ad-placeholder" role="complementary" aria-label="Espaço reservado para anúncio">
+  {disabled && (
+    <>
+      <span>Espaço para anúncio ({slot})</span>
+      <span class="text-xs text-muted block mt-1">Desabilitado até configuração do AdSense</span>
+    </>
+  )}
+  {!disabled && (
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <!-- AdSense slot would go here -->
+  )}
+  <style>
+    .ad-placeholder {
+      min-height: {minHeight}px;
+    }
+  </style>
+</div>

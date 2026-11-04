@@ -1,0 +1,27 @@
+---
+import type { Tool } from '@/types';
+import CalculatorCard from './CalculatorCard.astro';
+import { getToolById } from '@/data/tools';
+
+interface Props {
+  toolIds: string[];
+  title?: string;
+}
+
+const { toolIds = [], title = 'Outras ferramentas úteis' } = Astro.props;
+
+const relatedTools = toolIds
+  .map((id) => getToolById(id))
+  .filter((tool): tool is Tool => tool !== undefined);
+---
+
+{relatedTools.length > 0 && (
+  <section class="related-tools" aria-labelledby="related-tools-title">
+    <h2 id="related-tools-title" class="related-tools-title">{title}</h2>
+    <div class="grid grid-2 gap-6">
+      {relatedTools.map((tool) => (
+        <CalculatorCard tool={tool} />
+      ))}
+    </div>
+  </section>
+)}

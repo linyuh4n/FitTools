@@ -1,0 +1,238 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import ResultCard from '@/components/ResultCard.astro';
+import Disclaimer from '@/components/Disclaimer.astro';
+import RelatedTools from '@/components/RelatedTools.astro';
+import { calculateBMR, getActivityFactor, getActivityLabel, calculateTDEE, calculateTargetCalories } from '@/lib/calculations/calorie';
+import { generateCalculatorJsonLd, generateBreadcrumbJsonLd } from '@/lib/seo';
+import { formatCalories, formatNumber } from '@/lib/formatting';
+
+const calculatorJsonLd = generateCalculatorJsonLd({
+  name: 'Calculadora de Calorias',
+  description: 'Estime sua taxa metabólica basal e gasto energético diário total usando a equação Mifflin-St Jeor.',
+  url: 'https://fittools.com.br/ferramentas/calculadora-calorias/',
+  category: 'HealthApplication',
+});
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: 'Início', url: 'https://fittools.com.br/' },
+  { name: 'Ferramentas', url: 'https://fittools.com.br/ferramentas/' },
+  { name: 'Calculadora de Calorias', url: 'https://fittools.com.br/ferramentas/calculadora-calorias/' },
+]);
+---
+
+<MainLayout
+  title="Calculadora de Calorias - FitTools"
+  description="Calcule sua Taxa Metabólica Basal (TMB) e Gasto Energético Diário Total (GET) usando a equação Mifflin-St Jeor. Gratuita, sem cadastro, baseada em ciência."
+  canonical="/ferramentas/calculadora-calorias/"
+  jsonLd={{ '@graph': [calculatorJsonLd, breadcrumbJsonLd] }}
+  currentPath="/ferramentas/calculadora-calorias/"
+>
+  <div class="calculator-page">
+    <header class="calculator-header container">
+      <Breadcrumbs items={[
+        { label: 'Início', href: '/' },
+        { label: 'Ferramentas', href: '/ferramentas/' },
+        { label: 'Calculadora de Calorias' },
+      ]} />
+
+      <h1 class="calculator-title">Calculadora de Calorias</h1>
+      <p class="calculator-description">
+        Estime sua Taxa Metabólica Basal e Gasto Energético Diário Total usando a equação Mifflin-St Jeor.
+        Inclui fatores de atividade física e objetivo opcional (manter, perder, ganhar peso).
+      </p>
+    </header>
+
+    <div class="calculator-content container">
+      <!-- Form Section -->
+      <section class="calculator-form-section" aria-labelledby="form-title">
+        <div class="card calculator-form-card">
+          <h2 id="form-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">Seus dados</h2>
+
+          <form id="calorie-form" class="calculator-form" novalidate>
+            <!-- Sexo -->
+            <div class="form-field">
+              <label for="sex" class="form-label">Sexo biológico (para a equação) <span aria-hidden="true">*</span></label>
+              <select id="sex" name="sex" class="form-input" required aria-describedby="sex-hint">
+                <option value="">Selecione</option>
+                <option value="male">Masculino</option>
+                <option value="female">Feminino</option>
+              </select>
+              <span id="sex-hint" class="form-hint">Usado apenas para selecionar a equação Mifflin-St Jeor apropriada. Não define identidade de gênero.</span>
+              <span id="sex-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Idade -->
+            <div class="form-field">
+              <label for="age" class="form-label">Idade (anos) <span aria-hidden="true">*</span></label>
+              <div class="number-input-wrapper">
+                <input
+                  type="number"
+                  id="age"
+                  name="age"
+                  class="form-input"
+                  placeholder="Ex: 30"
+                  step="1"
+                  min="15"
+                  max="100"
+                  required
+                  aria-describedby="age-hint"
+                />
+                <span class="number-input-unit" aria-hidden="true">anos</span>
+              </div>
+              <span id="age-hint" class="form-hint">Sua idade em anos completos</span>
+              <span id="age-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Peso -->
+            <div class="form-field">
+              <label for="weight" class="form-label">Peso (kg) <span aria-hidden="true">*</span></label>
+              <div class="number-input-wrapper">
+                <input
+                  type="number"
+                  id="weight"
+                  name="weight"
+                  class="form-input"
+                  placeholder="Ex: 70"
+                  step="0.1"
+                  min="20"
+                  max="300"
+                  required
+                  aria-describedby="weight-hint"
+                />
+                <span class="number-input-unit" aria-hidden="true">kg</span>
+              </div>
+              <span id="weight-hint" class="form-hint">Seu peso atual em quilogramas</span>
+              <span id="weight-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Altura -->
+            <div class="form-field">
+              <label for="height" class="form-label">Altura (cm) <span aria-hidden="true">*</span></label>
+              <div class="number-input-wrapper">
+                <input
+                  type="number"
+                  id="height"
+                  name="height"
+                  class="form-input"
+                  placeholder="Ex: 175"
+                  step="0.1"
+                  min="100"
+                  max="250"
+                  required
+                  aria-describedby="height-hint"
+                />
+                <span class="number-input-unit" aria-hidden="true">cm</span>
+              </div>
+              <span id="height-hint" class="form-hint">Sua altura em centímetros</span>
+              <span id="height-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Nível de atividade -->
+            <fieldset class="form-field">
+              <legend class="form-label">Nível de atividade física <span aria-hidden="true">*</span></legend>
+              <div class="radio-group" role="radiogroup" aria-label="Selecione seu nível de atividade">
+                <label class="radio-option">
+                  <input type="radio" name="activityLevel" value="sedentary" required />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Sedentário</span>
+                  <span class="radio-description">Pouco ou nenhum exercício (trabalho de escritório, sem treino)</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="activityLevel" value="light" />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Leve</span>
+                  <span class="radio-description">Exercício leve 1–3 dias/semana (caminhada, alongamento)</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="activityLevel" value="moderate" />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Moderado</span>
+                  <span class="radio-description">Exercício moderado 3–5 dias/semana (musculação, corrida, natação)</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="activityLevel" value="very" />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Intenso</span>
+                  <span class="radio-description">Exercício intenso 6–7 dias/semana (treino pesado, atleta amador)</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="activityLevel" value="extra" />
+                  <span class="radio-custom" aria-hidden="true"></span>
+                  <span class="radio-label">Muito intenso</span>
+                  <span class="radio-description">Exercício muito intenso, trabalho físico pesado ou treino 2x/dia</span>
+                </label>
+              </div>
+              <span id="activityLevel-error" class="form-error" aria-live="polite"></span>
+            </fieldset>
+
+            <!-- Objetivo (opcional) -->
+            <div class="form-field">
+              <label for="goal" class="form-label">Objetivo (opcional)</label>
+              <select id="goal" name="goal" class="form-input" aria-describedby="goal-hint">
+                <option value="">Manutenção (padrão)</option>
+                <option value="lose">Perder peso (déficit ~500 kcal)</option>
+                <option value="gain">Ganhar peso (superávit ~500 kcal)</option>
+              </select>
+              <span id="goal-hint" class="form-hint">Ajusta a meta calórica diária. Déficits/superávits agressivos não são recomendados sem supervisão.</span>
+              <span id="goal-error" class="form-error" aria-live="polite"></span>
+            </div>
+
+            <!-- Ações -->
+            <div class="calculator-form-actions">
+              <button type="submit" class="btn btn-primary btn-lg" id="calculate-btn">
+                Calcular
+              </button>
+              <button type="button" class="btn btn-secondary btn-lg" id="clear-btn">
+                Limpar
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="calculator-results-section" aria-labelledby="results-title" aria-live="polite">
+        <div class="card calculator-form-card" id="results-container" style="display: none;">
+          <h2 id="results-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">Resultado</h2>
+
+          <div id="result-card-container">
+            <!-- ResultCard será inserido aqui via JS -->
+          </div>
+
+          <div class="calculator-form-actions" style="margin-top: var(--space-6);">
+            <button type="button" class="btn btn-outline share-btn" id="share-btn" aria-label="Compartilhar resultado">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              Compartilhar
+            </button>
+            <button type="button" class="btn btn-secondary" id="print-btn" aria-label="Imprimir resultado">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2-2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <!-- Estado vazio -->
+        <div id="empty-state" class="card calculator-form-card" style="text-align: center; padding: var(--space-12);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto var(--space-4); color: var(--color-text-muted);" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">Preencha o formulário</h3>
+          <p style="color: var(--color-text-secondary);">Insira seus dados para calcular TMB e GET.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</MainLayout>

@@ -1,0 +1,67 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import CalculatorCard from '@/components/CalculatorCard.astro';
+import { tools } from '@/data/tools';
+---
+
+<MainLayout
+  title="Ferramentas - FitTools"
+  description="Todas as calculadoras gratuitas do FitTools: proteína, IMC, calorias e mais. Baseadas em ciência, sem cadastro."
+  currentPath="/ferramentas/"
+>
+  <div class="container" style="padding: var(--space-12) 0;">
+    <Breadcrumbs items={[
+      { label: 'Início', href: '/' },
+      { label: 'Ferramentas' },
+    ]} />
+
+    <header style="text-align: center; margin-bottom: var(--space-12);">
+      <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-4);">Nossas ferramentas</h1>
+      <p style="font-size: var(--text-lg); color: var(--color-text-secondary); max-width: 600px; margin: 0 auto;">
+        Calculadoras gratuitas, baseadas em referências científicas, executadas no seu navegador.
+        Sem cadastro, sem coleta de dados, privacidade garantida.
+      </p>
+    </header>
+
+    <div class="grid grid-3 gap-6">
+      {tools.map((tool) => (
+        <CalculatorCard tool={tool} />
+      ))}
+    </div>
+
+    <section style="margin-top: var(--space-16);" aria-labelledby="coming-soon-title">
+      <h2 id="coming-soon-title" class="section-title" style="text-align: center;">Em desenvolvimento</h2>
+      <p class="section-subtitle">Novas ferramentas sendo preparadas com o mesmo rigor científico.</p>
+
+      <div class="grid grid-3 gap-6">
+        <article class="card" style="padding: var(--space-6); opacity: 0.6;">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Calculadora de Macronutrientes</h3>
+          <p style="color: var(--color-text-secondary);">Distribuição de carboidratos, proteínas e gorduras baseada no objetivo.</p>
+          <span class="badge badge-primary">Em breve</span>
+        </article>
+
+        <article class="card" style="padding: var(--space-6); opacity: 0.6;">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Calculadora de Volume de Treino</h3>
+          <p style="color: var(--color-text-secondary);">Séries, repetições e carga semanal por grupo muscular.</p>
+          <span class="badge badge-primary">Em breve</span>
+        </article>
+
+        <article class="card" style="padding: var(--space-6); opacity: 0.6;">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Calculadora de % de Gordura</h3>
+          <p style="color: var(--color-text-secondary);">Estimativa por dobras cutâneas ou circunferências.</p>
+          <span class="badge badge-primary">Em breve</span>
+        </article>
+      </div>
+    </section>
+  </div>
+</MainLayout>

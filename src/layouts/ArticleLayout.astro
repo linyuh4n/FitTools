@@ -1,0 +1,100 @@
+---
+import MainLayout from './MainLayout.astro';
+import { generateArticleJsonLd, generateBreadcrumbJsonLd } from '@/lib/seo';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import RelatedTools from '@/components/RelatedTools.astro';
+import Disclaimer from '@/components/Disclaimer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  author: string;
+  canonical?: string;
+  ogImage?: string;
+  relatedTools?: string[];
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+}
+
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  author,
+  canonical,
+  ogImage,
+  relatedTools = [],
+  breadcrumbs = [],
+} = Astro.props;
+
+const articleJsonLd = generateArticleJsonLd({
+  title,
+  description,
+  url: canonical ? `https://fittools.com.br${canonical}` : 'https://fittools.com.br',
+  image: ogImage ? `https://fittools.com.br${ogImage}` : 'https://fittools.com.br/social/og-default.svg',
+  datePublished: pubDate.toISOString(),
+  dateModified: updatedDate?.toISOString() || pubDate.toISOString(),
+  authorName: author,
+  publisherName: 'FitTools',
+  publisherLogo: 'https://fittools.com.br/favicon.svg',
+});
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: 'Início', url: 'https://fittools.com.br/' },
+  { name: 'Blog', url: 'https://fittools.com.br/blog/' },
+  ...breadcrumbs.slice(2),
+]);
+
+const defaultBreadcrumbs = [
+  { label: 'Início', href: '/' },
+  { label: 'Blog', href: '/blog/' },
+  { label: title },
+];
+---
+
+<MainLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  ogImage={ogImage}
+  ogType="article"
+  jsonLd={{ '@graph': [articleJsonLd, breadcrumbJsonLd] }}
+>
+  <article>
+    <header class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-4);">
+      <Breadcrumbs items={breadcrumbs.length > 0 ? breadcrumbs : defaultBreadcrumbs} />
+      <h1 style="font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-4); line-height: 1.2;">
+        {title}
+      </h1>
+      <div style="display: flex; flex-wrap: wrap; gap: var(--space-4); font-size: var(--text-sm); color: var(--color-text-secondary);">
+        <time dateTime={pubDate.toISOString()}>
+          Publicado em {pubDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
+        </time>
+        {updatedDate && (
+          <>
+            <span>·</span>
+            <time dateTime={updatedDate.toISOString()}>
+              Atualizado em {updatedDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </time>
+          </>
+        )}
+        <span>·</span>
+        <span>Por {author}</span>
+      </div>
+    </header>
+
+    <div class="container" style="max-width: 800px; padding-bottom: var(--space-12);">
+      <div style="font-size: var(--text-lg); line-height: 1.8; color: var(--color-text);">
+        <slot />
+      </div>
+
+      {relatedTools.length > 0 && (
+        <RelatedTools toolIds={relatedTools} />
+      )}
+
+      <Disclaimer type="general" />
+    </div>
+  </article>
+</MainLayout>

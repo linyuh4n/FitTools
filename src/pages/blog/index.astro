@@ -1,0 +1,165 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import ArticleCard from '@/components/ArticleCard.astro';
+import type { BlogPost } from '@/types';
+import { generateBreadcrumbJsonLd } from '@/lib/seo';
+
+// Posts do blog (em produção, viriam de Content Collections)
+const posts: BlogPost[] = [
+  {
+    slug: 'quanta-proteina-consumir-por-dia',
+    title: 'Quanta proteína consumir por dia?',
+    description: 'Entenda as recomendações baseadas em ciência para diferentes objetivos: saúde, atividade física e hipertrofia. Inclui tabela de referência por peso.',
+    pubDate: new Date('2024-01-15'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'proteina-vegetal-melhores-fontes',
+    title: 'Proteína vegetal: quais são as melhores fontes?',
+    description: 'Conheça as melhores fontes de proteína vegetal e como combiná-las para obter todos os aminoácidos essenciais.',
+    pubDate: new Date('2024-01-20'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'lentilha-proteina',
+    title: 'Lentilha tem quanta proteína?',
+    description: 'Valor nutricional da lentilha cozida, como preparar e incluir na dieta para aumentar o consumo de proteína vegetal.',
+    pubDate: new Date('2024-01-25'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'grao-de-bico-proteina',
+    title: 'Grão-de-bico é uma boa fonte de proteína?',
+    description: 'Análise nutricional do grão-de-bico, comparação com outras leguminosas e dicas de preparo para melhor absorção.',
+    pubDate: new Date('2024-02-01'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'proteina-para-hipertrofia',
+    title: 'Proteína para hipertrofia: como calcular?',
+    description: 'Guia prático para calcular a proteína ideal para ganho de massa muscular baseado nas recomendações da ISSN e ACSM.',
+    pubDate: new Date('2024-02-10'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'distribuir-proteinas-ao-longo-do-dia',
+    title: 'Como distribuir proteínas ao longo do dia?',
+    description: 'Evidências sobre frequência de refeições, proteína por refeição e o conceito de "janela anabólica".',
+    pubDate: new Date('2024-02-15'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['protein-calculator'],
+  },
+  {
+    slug: 'taxa-metabolica-basal',
+    title: 'O que é taxa metabólica basal?',
+    description: 'Entenda o que é TMB, como é calculada (Mifflin-St Jeor vs Harris-Benedict) e por que varia entre pessoas.',
+    pubDate: new Date('2024-03-01'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['calorie-calculator'],
+  },
+  {
+    slug: 'como-calcular-imc',
+    title: 'Como calcular o IMC?',
+    description: 'Passo a passo do cálculo do IMC, tabela de classificação OMS e explicação das limitações para atletas e idosos.',
+    pubDate: new Date('2024-03-10'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['bmi-calculator'],
+  },
+  {
+    slug: 'gasto-energetico-diario',
+    title: 'Como funciona o gasto energético diário?',
+    description: 'Componentes do GET: TMB, efeito térmico dos alimentos, atividade física e NEAT. Como estimar e usar na prática.',
+    pubDate: new Date('2024-03-20'),
+    author: 'Equipe FitTools',
+    content: '',
+    references: [],
+    relatedTools: ['calorie-calculator'],
+  },
+];
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: 'Início', url: 'https://fittools.com.br/' },
+  { name: 'Blog', url: 'https://fittools.com.br/blog/' },
+]);
+---
+
+<MainLayout
+  title="Blog - FitTools"
+  description="Artigos baseados em evidências sobre proteína, IMC, calorias, nutrição e treinamento. Conteúdo original com referências científicas."
+  canonical="/blog/"
+  jsonLd={breadcrumbJsonLd}
+  currentPath="/blog/"
+>
+  <div class="container" style="padding: var(--space-12) 0; max-width: 1000px;">
+    <Breadcrumbs items={[
+      { label: 'Início', href: '/' },
+      { label: 'Blog' },
+    ]} />
+
+    <header style="text-align: center; margin-bottom: var(--space-12);">
+      <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-4);">Blog FitTools</h1>
+      <p style="font-size: var(--text-lg); color: var(--color-text-secondary); max-width: 700px; margin: 0 auto;">
+        Artigos baseados em evidências científicas sobre nutrição, treinamento e ferramentas fitness.
+        Cada artigo cita referências e conecta às nossas calculadoras gratuitas.
+      </p>
+    </header>
+
+    <div class="grid grid-3 gap-6">
+      {posts.map((post) => (
+        <ArticleCard post={post} />
+      ))}
+    </div>
+
+    <section style="margin-top: var(--space-16); padding-top: var(--space-12); border-top: 1px solid var(--color-border);" aria-labelledby="about-blog-title">
+      <h2 id="about-blog-title" class="section-title" style="text-align: center;">Sobre nosso conteúdo</h2>
+
+      <div class="grid grid-3 gap-6" style="margin-top: var(--space-8);">
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Baseado em evidências</h3>
+          <p style="color: var(--color-text-secondary);">Citamos referências: EFSA, ISSN, ACSM, Ministério da Saúde, TACO/TBCA, PubMed, SciELO.</p>
+        </article>
+
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Original e útil</h3>
+          <p style="color: var(--color-text-secondary);">Não copiamos conteúdo. Escrevemos respondendo à intenção de busca com exemplos práticos.</p>
+        </article>
+
+        <article class="card" style="padding: var(--space-6);">
+          <div class="calculator-icon" aria-hidden="true" style="margin-bottom: var(--space-4);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          </div>
+          <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2);">Conectado às ferramentas</h3>
+          <p style="color: var(--color-text-secondary);">Cada artigo linka para calculadoras relevantes para aplicar o conhecimento na prática.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</MainLayout>

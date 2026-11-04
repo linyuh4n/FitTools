@@ -1,0 +1,119 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+---
+
+<MainLayout
+  title="Termos de Uso - FitTools"
+  description="Termos de uso do FitTools. Regras de uso das ferramentas, isenção de responsabilidade, propriedade intelectual e lei aplicável."
+  currentPath="/termos/"
+>
+  <div class="container" style="padding: var(--space-12) 0; max-width: 800px;">
+    <Breadcrumbs items={[
+      { label: 'Início', href: '/' },
+      { label: 'Termos de Uso' },
+    ]} />
+
+    <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-4);">Termos de Uso</h1>
+    <p style="font-size: var(--text-lg); color: var(--color-text-secondary); margin-bottom: var(--space-8);">
+      Última atualização: <strong>Janeiro de 2024</strong>
+    </p>
+
+    <div style="font-size: var(--text-base); line-height: 1.8; color: var(--color-text);">
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">1. Aceitação dos termos</h2>
+      <p>Ao acessar e usar o FitTools (<code>fittools.com.br</code>), você concorda com estes Termos de Uso.
+      Se não concordar, por favor, não utilize o site.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">2. Natureza do serviço</h2>
+      <p>O FitTools disponibiliza <strong>calculadoras e ferramentas educativas gratuitas</strong> para fitness, nutrição e saúde.
+      O serviço é fornecido "como está" e "conforme disponível", sem garantias de disponibilidade ininterrupta ou livre de erros.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">3. Isenção de responsabilidade — Saúde e nutrição</h2>
+      <div class="disclaimer" style="margin: var(--space-4) 0; border-color: var(--color-warning); background-color: #fffbeb;">
+        <p style="color: var(--color-text);"><strong>IMPORTANTE:</strong> As ferramentas do FitTools são <strong>apenas para fins educativos e informativos</strong>.</p>
+        <ul style="list-style: disc; margin-left: var(--space-6); margin-top: var(--space-2);">
+          <li><strong>Não são aconselhamento médico, nutricional ou de educação física.</strong></li>
+          <li><strong>Não substituem consulta com profissionais qualificados</strong> (médicos, nutricionistas, educadores físicos, fisioterapeutas).</li>
+          <li>Fórmulas usadas (Mifflin-St Jeor, referências EFSA/ISSM/ACSM) são <strong>estimativas populacionais</strong> com margem de erro conhecida.</li>
+          <li>Resultados <strong>não são prescrições individualizadas</strong>.</li>
+          <li>Pessoas com condições de saúde (renal, cardíaca, metabólica, distúrbios alimentares, gestação, etc.) <strong>devem buscar orientação profissional antes de usar qualquer calculadora</strong>.</li>
+        </ul>
+      </div>
+      <p>O FitTools, seus mantenedores e colaboradores <strong>não se responsabilizam</strong> por decisões, ações, danos à saúde ou prejuízos decorrentes do uso das calculadoras.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">4. Precisão dos cálculos</h2>
+      <p>Embora utilizemos fórmulas validadas cientificamente e referências reconhecidas:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Equações de TMB (Mifflin-St Jeor) têm erro médio de ~10% em relação ao gasto real medido por calorimetria.</li>
+        <li>Classificação de IMC não distingue massa muscular de gordura; atletas podem ser classificados incorretamente.</li>
+        <li>Necessidades proteicas variam individualmente além do peso e objetivo (idade, composição corporal, intensidade, genética).</li>
+        <li>Valores nutricionais dos alimentos (base TACO/TBCA) são médias; valores reais variam por marca, preparo, origem.</li>
+      </ul>
+      <p>Sempre apresentamos faixas, não valores únicos, e explicitamos limitações em cada ferramenta.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">5. Propriedade intelectual</h2>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li><strong>Código fonte:</strong> Licenciado sob <a href="https://github.com/fittools/fittools/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a> — uso, modificação e distribuição livres com atribuição.</li>
+        <li><strong>Conteúdo editorial (artigos, textos, metodologia):</strong> © FitTools. Proibida reprodução integral sem autorização. Citações curtas com link permitido.</li>
+        <li><strong>Marca "FitTools", logo e identidade visual:</strong> Todos os direitos reservados.</li>
+        <li><strong>Dados nutricionais (TACO/TBCA):</strong> Domínio público / fontes governamentais.</li>
+        <li><strong>Fórmulas matemáticas:</strong> Domínio público / conhecimento científico estabelecido.</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">6. Uso permitido</h2>
+      <p>Você pode:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Usar as calculadoras quantas vezes quiser, gratuitamente.</li>
+        <li>Compartilhar resultados via botão nativo (Web Share API / copiar texto).</li>
+        <li>Imprimir resultados para uso pessoal.</li>
+        <li>Linkar para nossas páginas livremente.</li>
+        <li>Usar o código fonte sob licença MIT.</li>
+      </ul>
+      <p>Você <strong>não pode</strong>:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Usar bots, scrapers ou automação para extrair dados em massa.</li>
+        <li>Tentar comprometer a segurança, disponibilidade ou integridade do site.</li>
+        <li>Usar a marca "FitTools" de forma que sugira endosso ou parceria sem autorização.</li>
+        <li>Copiar conteúdo editorial integral para outros sites (exceto sob licença ou autorização).</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">7. Monetização e anúncios</h2>
+      <p>Atualmente <strong>não há anúncios nem monetização ativa</strong>.</p>
+      <p>No futuro, poderemos exibir anúncios via Google AdSense e links de afiliados (com <code>rel="sponsored"</code>).
+      Qualquer monetização será:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Identificada claramente como publicidade/patrocínio.</li>
+        <li>Não invasiva (sem pop-ups, auto-play de áudio, conteúdo enganoso).</li>
+        <li>Sujeita a consentimento prévio quando exigido por lei (LGPD/GDPR).</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">8. Links para terceiros</h2>
+      <p>O site pode conter links para Instagram, YouTube, GitHub, Formspree, fontes científicas (PubMed, SciELO, sites governamentais).
+      Não controlamos, endossamos nem nos responsabilizamos pelo conteúdo, políticas ou práticas de sites de terceiros.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">9. Disponibilidade e modificações</h2>
+      <p>Podemos modificar, suspender ou descontinuar o serviço (ou partes dele) a qualquer momento, sem aviso prévio.
+      Não garantimos que o site estará sempre disponível, livre de erros ou que defeitos serão corrigidos.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">10. Limitação de responsabilidade</h2>
+      <p>Na extensão máxima permitida por lei, o FitTools não será responsável por danos diretos, indiretos, incidentais, consequenciais ou punitivos decorrentes do uso ou incapacidade de usar o serviço.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">11. Indenização</h2>
+      <p>Você concorda em indenizar e isentar o FitTools de quaisquer reclamações, danos, perdas ou despesas (incluindo honorários advocatícios) decorrentes do seu uso indevido do serviço ou violação destes termos.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">12. Lei aplicável e foro</h2>
+      <p>Estes termos são regidos pelas leis da República Federativa do Brasil.
+      Fica eleito o foro da Comarca de São Paulo/SP para dirimir quaisquer controvérsias, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">13. Disposições gerais</h2>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Se qualquer cláusula for considerada inválida, as demais permanecem em vigor.</li>
+        <li>A não aplicação de um direito não constitui renúncia a esse direito.</li>
+        <li>Estes termos constituem o acordo integral entre você e o FitTools sobre o uso do serviço.</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">14. Contato</h2>
+      <p>Dúvidas sobre estes termos: <a href="/contato/">página de contato</a> ou <code>termos@fittools.com.br</code>.</p>
+    </div>
+  </div>
+</MainLayout>

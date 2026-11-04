@@ -1,0 +1,118 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+---
+
+<MainLayout
+  title="Sobre o FitTools - Ferramentas Gratuitas para Fitness"
+  description="Conheça a missão do FitTools: democratizar o acesso a ferramentas fitness baseadas em ciência, gratuitas e sem cadastro."
+  currentPath="/sobre/"
+>
+  <div class="container" style="padding: var(--space-12) 0; max-width: 800px;">
+    <Breadcrumbs items={[
+      { label: 'Início', href: '/' },
+      { label: 'Sobre' },
+    ]} />
+
+    <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-8);">Sobre o FitTools</h1>
+
+    <div style="font-size: var(--text-lg); line-height: 1.8; color: var(--color-text);">
+      <p style="margin-bottom: var(--space-6);">
+        O <strong>FitTools</strong> nasceu com uma missão simples: oferecer ferramentas gratuitas, baseadas em ciência,
+        para ajudar qualquer pessoa a entender melhor sua alimentação, treinamento e evolução física.
+      </p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">Nossos princípios</h2>
+
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: var(--space-6);">
+        <li style="display: flex; gap: var(--space-4);">
+          <div class="calculator-icon" style="flex-shrink: 0;" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Gratuito para sempre</h3>
+            <p style="color: var(--color-text-secondary);">Todas as calculadoras são 100% gratuitas. Sem assinaturas, sem trials, sem recursos bloqueados.</p>
+          </div>
+        </li>
+
+        <li style="display: flex; gap: var(--space-4);">
+          <div class="calculator-icon" style="flex-shrink: 0;" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Privacidade por padrão</h3>
+            <p style="color: var(--color-text-secondary);">Seus dados ficam no seu navegador. Não enviamos peso, altura ou informações pessoais para servidores.</p>
+          </div>
+        </li>
+
+        <li style="display: flex; gap: var(--space-4);">
+          <div class="calculator-icon" style="flex-shrink: 0;" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Baseado em evidências</h3>
+            <p style="color: var(--color-text-secondary);">Usamos referências como EFSA, ISSN, ACSM e Ministério da Saúde. Cada calculadora cita suas fontes.</p>
+          </div>
+        </li>
+
+        <li style="display: flex; gap: var(--space-4);">
+          <div class="calculator-icon" style="flex-shrink: 0;" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Transparência total</h3>
+            <p style="color: var(--color-text-secondary);">Mostramos as fórmulas, limitações e referências. Não escondemos como os cálculos são feitos.</p>
+          </div>
+        </li>
+
+        <li style="display: flex; gap: var(--space-4);">
+          <div class="calculator-icon" style="flex-shrink: 0;" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Sem cadastro</h3>
+            <p style="color: var(--color-text-secondary);">Use quantas vezes quiser, sem criar conta, sem e-mail, sem login, sem spam.</p>
+          </div>
+        </li>
+
+        <li style="display: flex; gap: var(--space-4);">
+          <div class="calculator-icon" style="flex-shrink: 0;" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Acessível</h3>
+            <p style="color: var(--color-text-secondary);">Design responsivo, contraste adequado, navegação por teclado, leitores de tela.</p>
+          </div>
+        </li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-12) 0 var(--space-4);">Ferramentas atuais</h2>
+
+      <ul style="list-style: disc; margin-left: var(--space-6); line-height: 2; color: var(--color-text-secondary);">
+        <li><strong>Calculadora de Proteínas:</strong> Necessidade diária baseada em peso, objetivo e preferência alimentar.</li>
+        <li><strong>Calculadora de IMC:</strong> Índice de Massa Corporal com classificação OMS e limitações explicadas.</li>
+        <li><strong>Calculadora de Calorias:</strong> TMB (Mifflin-St Jeor) + GET com fatores de atividade.</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-12) 0 var(--space-4);">Aviso importante</h2>
+
+      <div class="disclaimer" style="margin-top: var(--space-4);">
+        <p style="color: var(--color-text);">
+          <strong>O FitTools fornece ferramentas educativas, não aconselhamento médico ou nutricional.</strong>
+          As calculadoras usam fórmulas populacionais que têm limitações conhecidas. Resultados são estimativas,
+          não prescrições. Para planejamento alimentar, treinamento ou questões de saúde, consulte profissionais
+          qualificados: médicos, nutricionistas e educadores físicos.
+        </p>
+      </div>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-12) 0 var(--space-4);">Contato</h2>
+
+      <p style="color: var(--color-text-secondary); margin-bottom: var(--space-2);">
+        Tem sugestões, encontrou um erro ou quer contribuir?
+      </p>
+      <p style="color: var(--color-text-secondary);">
+        <a href="/contato/" class="btn btn-outline">Fale conosco</a>
+      </p>
+    </div>
+  </div>
+</MainLayout>

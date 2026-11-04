@@ -1,0 +1,44 @@
+---
+import type { Tool } from '@/types';
+
+interface Props {
+  tool: Tool;
+}
+
+const { tool } = Astro.props;
+
+const icons: Record<string, string> = {
+  protein: '',
+  bmi: '',
+  calorie: '',
+  default: '',
+};
+---
+
+<article class="card calculator-card">
+  <a href={tool.href} class="calculator-card-link" aria-label={`Acessar ${tool.name}`}>
+    <div class="calculator-icon" aria-hidden="true">
+      {icons[tool.icon] || icons.default}
+    </div>
+    <h3 class="calculator-name">{tool.name}</h3>
+    <p class="calculator-description">{tool.description}</p>
+    <div class="calculator-tags">
+      <span class="calculator-tag">Gratuito</span>
+      <span class="calculator-tag">{tool.category === 'nutrition' ? 'Nutrição' : tool.category === 'training' ? 'Treinamento' : 'Saúde'}</span>
+    </div>
+  </a>
+</article>
+
+<style>
+  .calculator-card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+  .calculator-card-link:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+</style>

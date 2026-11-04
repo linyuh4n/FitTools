@@ -1,0 +1,84 @@
+---
+import { getCollection } from "astro:content";
+import ArticleLayout from "@/layouts/ArticleLayout.astro";
+import { generateArticleJsonLd, generateBreadcrumbJsonLd } from "@/lib/seo";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+  { name: "Início", url: "https://fittools.com.br/" },
+  { name: "Blog", url: "https://fittools.com.br/blog/" },
+  { name: post.data.title, url: `https://fittools.com.br/blog/${post.id}/` },
+]);
+
+const articleJsonLd = generateArticleJsonLd({
+  title: post.data.title,
+  description: post.data.description,
+  url: `https://fittools.com.br/blog/${post.id}/`,
+  image: post.data.ogImage ? `https://fittools.com.br${post.data.ogImage}` : "https://fittools.com.br/social/og-default.svg",
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: post.data.updatedDate?.toISOString() || post.data.pubDate.toISOString(),
+  authorName: post.data.author,
+  publisherName: "FitTools",
+  publisherLogo: "https://fittools.com.br/favicon.svg",
+});
+---
+
+<ArticleLayout
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  author={post.data.author}
+  canonical={`/blog/${post.id}/`}
+  ogImage={post.data.ogImage}
+  relatedTools={post.data.relatedTools}
+  breadcrumbs={[
+    { label: "Início", href: "/" },
+    { label: "Blog", href: "/blog/" },
+    { label: post.data.title },
+  ]}
+  jsonLd={{ "@graph": [articleJsonLd, breadcrumbJsonLd] }}
+>
+  <slot>
+    <article>
+      {post.data.coverImage && (
+        <figure style="margin: var(--space-8) 0;">
+          <img
+            src={post.data.coverImage}
+            alt=""
+            style="width: 100%; border-radius: var(--radius-lg);"
+          />
+          {post.data.coverCaption && (
+            <figcaption style="text-align: center; margin-top: var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted);">
+              {post.data.coverCaption}
+            </figcaption>
+          )}
+        </figure>
+      )}
+
+      <div set:html={post.rendered.html} style="font-size: var(--text-lg); line-height: 1.8;">
+        <!-- Conteúdo renderizado do Markdown/MDX -->
+      </div>
+
+      {post.data.references && post.data.references.length > 0 && (
+        <section style="margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--color-border);" aria-labelledby="references-title">
+          <h2 id="references-title" style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-4);">Referências</h2>
+          <ol style="list-style: decimal; margin-left: var(--space-6); font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 2;">
+            {post.data.references.map((ref) => (
+              <li>{ref}</li>
+            ))}
+          </ol>
+        </section>
+      )}
+    </article>
+  </slot>
+</ArticleLayout>

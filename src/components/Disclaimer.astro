@@ -1,0 +1,47 @@
+---
+interface Props {
+  items?: string[];
+  title?: string;
+  type?: 'general' | 'medical' | 'nutrition' | 'calculator';
+}
+
+const {
+  type = 'general',
+  title = 'Aviso importante',
+  items = [],
+} = Astro.props;
+
+const defaultDisclaimers: Record<string, string[]> = {
+  general: [
+    'Este site fornece informações educativas e não substitui aconselhamento médico, nutricional ou de educação física profissional.',
+    'Consulte sempre profissionais qualificados antes de iniciar qualquer programa de exercícios ou mudança na alimentação.',
+  ],
+  medical: [
+    'Esta ferramenta não fornece diagnóstico médico.',
+    'O IMC é apenas um indicador de triagem e não avalia composição corporal, massa muscular ou saúde geral.',
+    'Pessoas com condições médicas pré-existentes devem consultar um médico antes de usar esta calculadora.',
+  ],
+  nutrition: [
+    'As necessidades proteicas variam individualmente conforme idade, sexo, composição corporal, intensidade do treino e condições de saúde.',
+    'Valores apresentados são estimativas baseadas em referências populacionais, não prescrições individualizadas.',
+    'Pessoas com doença renal ou outras condições clínicas devem buscar orientação de nutricionista ou médico.',
+    'A preferência alimentar altera apenas os exemplos de alimentos sugeridos, não a necessidade proteica calculada.',
+  ],
+  calculator: [
+    'Resultados são estimativas baseadas em equações validadas para populações saudáveis adultas.',
+    'O gasto energético real pode variar significativamente entre indivíduos.',
+    'Não utilize para planejamento nutricional em condições clínicas sem supervisão profissional.',
+  ],
+};
+
+const disclaimerItems = items.length > 0 ? items : defaultDisclaimers[type] || defaultDisclaimers.general;
+---
+
+<aside class="disclaimer" role="note" aria-labelledby="disclaimer-title">
+  <h3 id="disclaimer-title" class="disclaimer-title">{title}</h3>
+  <ul>
+    {disclaimerItems.map((item) => (
+      <li>{item}</li>
+    ))}
+  </ul>
+</aside>

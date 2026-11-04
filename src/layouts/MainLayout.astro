@@ -1,0 +1,101 @@
+---
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { generateWebSiteJsonLd, generateOrganizationJsonLd } from '@/lib/seo';
+import '@/styles/global.css';
+import '@/styles/components.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  twitterCard?: 'summary' | 'summary_large_image';
+  jsonLd?: Record<string, unknown>;
+  currentPath?: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage,
+  ogType = 'website',
+  twitterCard = 'summary_large_image',
+  jsonLd,
+  currentPath = '/',
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://fittools.com.br';
+const fullCanonical = canonical ? `${siteUrl}${canonical.startsWith('/') ? '' : '/'}${canonical}` : siteUrl;
+const fullOgImage = ogImage ? `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}` : `${siteUrl}/social/og-default.svg`;
+
+const webSiteJsonLd = generateWebSiteJsonLd();
+const organizationJsonLd = generateOrganizationJsonLd();
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={fullCanonical} />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Title & Meta -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={fullCanonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={fullOgImage} />
+    <meta property="og:site_name" content="FitTools" />
+    <meta property="og:locale" content="pt_BR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content={twitterCard} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={fullOgImage} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/social/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(webSiteJsonLd)}></script>
+    <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)}></script>
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>}
+
+    <!-- Preconnect para performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Fonte Inter (carregamento otimizado) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+
+    <style>
+      :root {
+        --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+    <Header currentPath={currentPath} />
+
+    <main id="main-content" role="main">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

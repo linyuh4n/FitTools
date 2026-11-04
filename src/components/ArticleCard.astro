@@ -1,0 +1,49 @@
+---
+import type { BlogPost } from '@/types';
+import { formatDate, formatDateISO } from '@/lib/formatting';
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+---
+
+<article class="card article-card">
+  <a href={`/blog/${post.slug}/`} class="article-card-link" aria-label={`Ler artigo: ${post.title}`}>
+    <div class="article-card-content">
+      <div class="article-card-meta">
+        <time dateTime={formatDateISO(post.pubDate)}>{formatDate(post.pubDate)}</time>
+        {post.updatedDate && (
+          <>
+            <span aria-hidden="true">·</span>
+            <time dateTime={formatDateISO(post.updatedDate)}>Atualizado em {formatDate(post.updatedDate)}</time>
+          </>
+        )}
+      </div>
+      <h2 class="article-card-title">{post.title}</h2>
+      <p class="article-card-excerpt">{post.description}</p>
+      <div class="article-card-footer">
+        <span>Leia mais</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .article-card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+  .article-card-link:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+</style>

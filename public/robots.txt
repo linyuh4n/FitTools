@@ -1,0 +1,13 @@
+# FitTools - robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://fittools.com.br/sitemap-index.xml
+
+# Crawl-delay (opcional, para servidores compartilhados)
+# Crawl-delay: 10
+
+# Disallow admin/private areas (none in static site)
+# Disallow: /admin/
+# Disallow: /api/

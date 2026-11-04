@@ -1,0 +1,184 @@
+---
+import type { ProteinCalculatorResult, BMICalculatorResult, CalorieCalculatorResult } from '@/types';
+import { formatNumber, formatProtein, formatBMI, formatCalories, formatProteinPerKg } from '@/lib/formatting';
+
+interface Props {
+  result: ProteinCalculatorResult | BMICalculatorResult | CalorieCalculatorResult;
+  type: 'protein' | 'bmi' | 'calorie';
+}
+
+const { result, type } = Astro.props;
+---
+
+{type === 'protein' && (
+  <div class="card result-card" role="region" aria-labelledby="protein-result-title">
+    <h2 id="protein-result-title" class="sr-only">Resultado da Calculadora de Proteínas</h2>
+
+    <div class="result-main">
+      <div class="result-value">{formatNumber(result.averageGramsPerDay)}</div>
+      <span class="result-unit">g/dia</span>
+      <div class="result-range">
+        <div class="result-range-item">
+          <span class="result-range-label">Mínimo</span>
+          <span class="result-range-value">{formatNumber(result.minGramsPerDay)} g</span>
+        </div>
+        <div class="result-range-item">
+          <span class="result-range-label">Máximo</span>
+          <span class="result-range-value">{formatNumber(result.maxGramsPerDay)} g</span>
+        </div>
+      </div>
+      <div class="result-range">
+        <div class="result-range-item">
+          <span class="result-range-label">Faixa g/kg/dia</span>
+          <span class="result-range-value">{formatProteinPerKg(result.range.min)} – {formatProteinPerKg(result.range.max)}</span>
+        </div>
+      </div>
+
+      {result.perMeal && (
+        <div class="protein-per-meal">
+          <span class="protein-per-meal-label">Por refeição ({result.perMeal} refeições):</span>
+          <span class="protein-per-meal-value">{formatNumber(result.perMeal)} g</span>
+        </div>
+      )}
+    </div>
+
+    <div class="result-details">
+      <div class="result-detail">
+        <span class="result-detail-label">Peso informado</span>
+        <span class="result-detail-value">{formatNumber(result.weight, { decimals: 1 })} kg</span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Objetivo</span>
+        <span class="result-detail-value">
+          {result.goal === 'health' ? 'Saúde geral' : result.goal === 'active' ? 'Atividade física' : 'Hipertrofia'}
+        </span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Preferência</span>
+        <span class="result-detail-value">
+          {result.dietPreference === 'omnivore' ? 'Onívora' : result.dietPreference === 'vegetarian' ? 'Vegetariana' : 'Vegana'}
+        </span>
+      </div>
+      {result.mealsPerDay && (
+        <div class="result-detail">
+          <span class="result-detail-label">Refeições/dia</span>
+          <span class="result-detail-value">{result.mealsPerDay}</span>
+        </div>
+      )}
+    </div>
+
+    {result.foods.length > 0 && (
+      <div class="result-foods">
+        <h3 class="result-foods-title">Exemplos de fontes de proteína</h3>
+        <div class="result-foods-grid">
+          {result.foods.slice(0, 6).map((food) => (
+            <div class="result-food-item">
+              <div class="result-food-info">
+                <span class="result-food-name">{food.name}</span>
+                <span class="result-food-serving">
+                  {formatNumber(food.servingSize, { decimals: 0 })} {food.servingUnit} ({food.state}) = {formatNumber(food.proteinPer100g * food.servingSize / 100, { decimals: 1 })} g proteína
+                </span>
+              </div>
+              <span class="result-food-protein">{formatProtein(food.proteinPer100g)}/100g</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+{type === 'bmi' && (
+  <div class="card result-card" role="region" aria-labelledby="bmi-result-title">
+    <h2 id="bmi-result-title" class="sr-only">Resultado da Calculadora de IMC</h2>
+
+    <div class="result-main">
+      <div class="result-value">{formatBMI(result.bmi)}</div>
+      <span class="result-unit">kg/m²</span>
+      <div class="result-range">
+        <div class="result-range-item">
+          <span class="result-range-label">Classificação</span>
+          <span class="result-range-value">{result.categoryLabel}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-details">
+      <div class="result-detail">
+        <span class="result-detail-label">Peso</span>
+        <span class="result-detail-value">{formatNumber(result.weight, { decimals: 1 })} kg</span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Altura</span>
+        <span class="result-detail-value">{formatNumber(result.height / 100, { decimals: 2 })} m</span>
+      </div>
+    </div>
+  </div>
+)}
+
+{type === 'calorie' && (
+  <div class="card result-card" role="region" aria-labelledby="calorie-result-title">
+    <h2 id="calorie-result-title" class="sr-only">Resultado da Calculadora de Calorias</h2>
+
+    <div class="result-main">
+      <div class="result-value">{formatCalories(result.tdee)}</div>
+      <span class="result-unit">Gasto Energético Diário Total</span>
+      <div class="result-range">
+        <div class="result-range-item">
+          <span class="result-range-label">Taxa Metabólica Basal</span>
+          <span class="result-range-value">{formatCalories(result.bmr)}</span>
+        </div>
+        {result.targetCalories && (
+          <div class="result-range-item">
+            <span class="result-range-label">Meta ({result.goal === 'lose' ? 'Perder peso' : result.goal === 'gain' ? 'Ganhar peso' : 'Manter'})</span>
+            <span class="result-range-value">{formatCalories(result.targetCalories)}</span>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div class="calorie-breakdown">
+      <div class="calorie-breakdown-item">
+        <span class="calorie-breakdown-label">TMB</span>
+        <span class="calorie-breakdown-value">{formatCalories(result.bmr)}</span>
+      </div>
+      <div class="calorie-breakdown-item">
+        <span class="calorie-breakdown-label">Fator Atividade</span>
+        <span class="calorie-breakdown-value">{result.activityFactor.toFixed(2)}</span>
+      </div>
+      <div class="calorie-breakdown-item">
+        <span class="calorie-breakdown-label">GET</span>
+        <span class="calorie-breakdown-value">{formatCalories(result.tdee)}</span>
+      </div>
+      {result.targetCalories && (
+        <div class="calorie-breakdown-item">
+          <span class="calorie-breakdown-label">Meta</span>
+          <span class="calorie-breakdown-value">{formatCalories(result.targetCalories)}</span>
+        </div>
+      )}
+    </div>
+
+    <div class="result-details">
+      <div class="result-detail">
+        <span class="result-detail-label">Sexo (equação)</span>
+        <span class="result-detail-value">{result.sex === 'male' ? 'Masculino' : 'Feminino'}</span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Idade</span>
+        <span class="result-detail-value">{result.age} anos</span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Peso</span>
+        <span class="result-detail-value">{formatNumber(result.weight, { decimals: 1 })} kg</span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Altura</span>
+        <span class="result-detail-value">{formatNumber(result.height / 100, { decimals: 2 })} m</span>
+      </div>
+      <div class="result-detail">
+        <span class="result-detail-label">Atividade</span>
+        <span class="result-detail-value">{result.activityLevel}</span>
+      </div>
+    </div>
+  </div>
+)}

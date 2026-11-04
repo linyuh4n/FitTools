@@ -1,0 +1,103 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+---
+
+<MainLayout
+  title="Política de Privacidade - FitTools"
+  description="Política de privacidade do FitTools. Explicamos quais dados são coletados, como são usados e seus direitos segundo a LGPD."
+  currentPath="/privacidade/"
+>
+  <div class="container" style="padding: var(--space-12) 0; max-width: 800px;">
+    <Breadcrumbs items={[
+      { label: 'Início', href: '/' },
+      { label: 'Política de Privacidade' },
+    ]} />
+
+    <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-4);">Política de Privacidade</h1>
+    <p style="font-size: var(--text-lg); color: var(--color-text-secondary); margin-bottom: var(--space-8);">
+      Última atualização: <strong>Janeiro de 2024</strong>
+    </p>
+
+    <div style="font-size: var(--text-base); line-height: 1.8; color: var(--color-text);">
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">1. Resumo</h2>
+      <p>O FitTools é uma plataforma de ferramentas fitness gratuitas que roda inteiramente no seu navegador.
+      <strong>Não coletamos dados pessoais, não criamos perfis de usuários e não vendemos informações.</strong>
+      Esta política explica exatamente o que acontece quando você usa nossas ferramentas.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">2. Dados que NÃO coletamos</h2>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Peso, altura, idade ou quaisquer medidas corporais</li>
+        <li>Resultados de calculadoras (IMC, proteína, calorias)</li>
+        <li>Endereço IP (exceto logs temporários de servidor, veja seção 4)</li>
+        <li>Nome, e-mail, telefone ou identificadores pessoais</li>
+        <li>Dados de saúde, condições médicas ou histórico</li>
+        <li>Cookies de rastreamento, fingerprinting ou localStorage para identificação</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">3. Como as calculadoras funcionam</h2>
+      <p>Todas as calculadoras (proteína, IMC, calorias) executam <strong>localmente no seu navegador</strong> usando JavaScript.</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Os valores que você digita ficam apenas na memória temporária da página</li>
+        <li>Nenhum dado é enviado para nossos servidores ou terceiros</li>
+        <li>Ao fechar a aba, os dados desaparecem</li>
+        <li>O botão "Compartilhar" usa a Web Share API do navegador ou copia texto para a área de transferência — nenhum dado passa por nossos servidores</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">4. Logs de servidor (hospedagem)</h2>
+      <p>O site é hospedado no Cloudflare Pages. Como todo site na web, o servidor registra logs temporários de acesso que podem incluir:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Endereço IP (anonimizado pelo Cloudflare)</li>
+        <li>Página acessada</li>
+        <li>Horário da requisição</li>
+        <li>User-Agent (navegador/sistema operacional)</li>
+        <li>Código de resposta HTTP</li>
+      </ul>
+      <p>Esses logs são gerenciados pelo Cloudflare, não por nós, e são usados para segurança e performance da rede. Não temos acesso a logs que identifiquem você pessoalmente.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">5. Cookies e armazenamento local</h2>
+      <p><strong>Não usamos cookies</strong> para rastreamento, analytics ou identificação.</p>
+      <p>O site pode usar <code>localStorage</code> ou <code>sessionStorage</code> apenas para:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Preferências de interface (ex.: tema claro/escuro, se implementado no futuro)</li>
+        <li>Cache de assets estáticos para performance</li>
+      </ul>
+      <p>Nenhuma informação pessoal é armazenada.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">6. Formulário de contato</h2>
+      <p>Se você usar o formulário em <a href="/contato/">/contato/</a>, os dados (nome, e-mail, assunto, mensagem) são enviados ao <strong>Formspree</strong>, nosso processador de formulários. Não armazenamos esses dados em nossos servidores. Consulte a <a href="https://formspree.io/privacy/" target="_blank" rel="noopener">política de privacidade do Formspree</a>.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">7. Analytics e anúncios (futuro)</h2>
+      <p>Atualmente <strong>não usamos Google Analytics, Google AdSense ou pixels de rastreamento</strong>.</p>
+      <p>Se no futuro implementarmos:</p>
+      <ul style="list-style: disc; margin-left: var(--space-6); margin-bottom: var(--space-4);">
+        <li>Google Analytics 4: será configurado com IP anonimizado e consentimento prévio (LGPD/GDPR)</li>
+        <li>Google AdSense: anúncios só serão exibidos após consentimento explícito</li>
+        <li>Qualquer tecnologia de rastreamento terá banner de consentimento conforme LGPD</li>
+      </ul>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">8. Seus direitos (LGPD - Lei 13.709/2018)</h2>
+      <p>Como não processamos dados pessoais seus, a maioria dos direitos (acesso, retificação, exclusão, portabilidade) não se aplica — não há o que acessar, corrigir ou excluir.</p>
+      <p>Se você enviou o formulário de contato, pode solicitar exclusão dos dados no Formspree pelo e-mail <code>privacy@formspree.io</code>.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">9. Links externos</h2>
+      <p>Nosso site pode conter links para Instagram, YouTube, GitHub, Formspree e fontes científicas. Esta política não cobre sites de terceiros. Recomendamos ler as políticas de privacidade deles.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">10. Crianças e adolescentes</h2>
+      <p>O FitTools não é direcionado a menores de 13 anos. Não coletamos dados de crianças intencionalmente. Se você é pai/mãe e acredita que seu filho nos forneceu dados, entre em contato.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">11. Alterações nesta política</h2>
+      <p>Podemos atualizar esta política. A data de "Última atualização" no topo será alterada. Mudanças significativas serão comunicadas via banner no site.</p>
+
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin: var(--space-8) 0 var(--space-4);">12. Contato</h2>
+      <p>Dúvidas sobre esta política: <a href="/contato/">página de contato</a> ou <code>privacidade@fittools.com.br</code>.</p>
+
+      <hr style="margin: var(--space-12) 0; border-color: var(--color-border);" />
+
+      <p style="font-size: var(--text-sm); color: var(--color-text-muted);">
+        <strong>Base legal:</strong> Esta política segue a LGPD (Lei 13.709/2018) e boas práticas de privacidade por design.
+        Como não há tratamento de dados pessoais rotineiro, não há necessidade de DPO (Encarregado) dedicado.
+      </p>
+    </div>
+  </div>
+</MainLayout>

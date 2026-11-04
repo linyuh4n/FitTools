@@ -1,0 +1,125 @@
+---
+import type { NavigationItem } from '@/types';
+import { mainNavigation } from '@/data/navigation';
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+---
+
+<header class="header" role="banner">
+  <div class="container header-inner">
+    <a href="/" class="header-logo" aria-label="FitTools - Início">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+      <span>FitTools</span>
+    </a>
+
+    <nav class="header-nav" aria-label="Navegação principal">
+      {mainNavigation.map((item) => (
+        <a
+          href={item.href}
+          class="header-nav-link"
+          aria-current={currentPath.startsWith(item.href) && item.href !== '/' ? 'page' : undefined}
+        >
+          {item.label}
+          {item.children && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          )}
+        </a>
+      ))}
+    </nav>
+
+    <div class="header-actions">
+      <button
+        class="header-menu-btn"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Abrir menu"
+        data-menu-toggle
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {/* Mobile Menu */}
+  <div class="mobile-menu-overlay" id="mobile-menu-overlay" aria-hidden="true" data-menu-overlay></div>
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Menu mobile" role="navigation" data-menu>
+    <div class="mobile-menu-header">
+      <span class="font-semibold">Menu</span>
+      <button
+        class="mobile-menu-close"
+        aria-label="Fechar menu"
+        data-menu-close
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="mobile-menu-nav">
+      {mainNavigation.map((item) => (
+        <a
+          href={item.href}
+          class="mobile-menu-link"
+          aria-current={currentPath.startsWith(item.href) && item.href !== '/' ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const menuToggle = document.querySelector('[data-menu-toggle]');
+  const menuClose = document.querySelector('[data-menu-close]');
+  const menu = document.querySelector('[data-menu]');
+  const overlay = document.querySelector('[data-menu-overlay]');
+
+  function openMenu() {
+    menu?.classList.add('open');
+    overlay?.classList.add('open');
+    menuToggle?.setAttribute('aria-expanded', 'true');
+    overlay?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    menu?.classList.remove('open');
+    overlay?.classList.remove('open');
+    menuToggle?.setAttribute('aria-expanded', 'false');
+    overlay?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle?.addEventListener('click', openMenu);
+  menuClose?.addEventListener('click', closeMenu);
+  overlay?.addEventListener('click', closeMenu);
+
+  // Close on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menu?.classList.contains('open')) {
+      closeMenu();
+    }
+  });
+
+  // Close on link click
+  menu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+</script>

@@ -2,6 +2,7 @@
 import MainLayout from "@/layouts/MainLayout.astro";
 import { generateArticleJsonLd } from "@/lib/seo";
 import { foodDatabase, getFoodsByDietPreference, getFoodsByCategory, getTopProteinFoods } from "@/data/foods";
+import FoodTable from "@/components/FoodTable.astro";
 import "@/styles/components.css";
 
 const title = "Fontes de Proteína: Guia Completo com Tabela Nutricional";
@@ -25,39 +26,6 @@ const diets = [
   { key: "vegetarian", label: "Vegetariana", description: "Com ovos e laticínios" },
   { key: "vegan", label: "Vegana", description: "Apenas vegetais" },
 ] as const;
-
-function renderTable(foods: typeof foodDatabase) {
-  return (
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Alimento</th>
-            <th>Proteína (100g)</th>
-            <th>Porção ref.</th>
-            <th>Proteína/porção</th>
-            <th>Estado</th>
-            <th>Fonte</th>
-          </tr>
-        </thead>
-        <tbody>
-          {foods.map((food) => (
-            <tr>
-              <td class="food-name">{food.name}</td>
-              <td class="protein-value">{food.proteinPer100g.toFixed(1).replace(".", ",")} g</td>
-              <td class="serving-info">{food.servingSize} {food.servingUnit}</td>
-              <td class="protein-value">
-                {(food.proteinPer100g * food.servingSize / 100).toFixed(1).replace(".", ",")} g
-              </td>
-              <td class="food-state">{food.state}</td>
-              <td class="source-info">{food.source}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 ---
 
 <MainLayout title={title} description={description} canonical={canonical} jsonLd={jsonLd} currentPath="/nutricao/fontes-proteina/">
@@ -100,8 +68,8 @@ function renderTable(foods: typeof foodDatabase) {
             <button
               role="tab"
               aria-selected={diet.key === "omnivore"}
-              aria-controls={`panel-${diet.key}`}
-              id={`tab-${diet.key}`}
+              aria-controls={"panel-" + diet.key}
+              id={"tab-" + diet.key}
               data-diet={diet.key}
               class="diet-tab"
             >
@@ -117,8 +85,8 @@ function renderTable(foods: typeof foodDatabase) {
           return (
             <div
               role="tabpanel"
-              id={`panel-${diet.key}`}
-              aria-labelledby={`tab-${diet.key}`}
+              id={"panel-" + diet.key}
+              aria-labelledby={"tab-" + diet.key}
               class="diet-panel"
               hidden={diet.key !== "omnivore"}
             >
@@ -126,7 +94,7 @@ function renderTable(foods: typeof foodDatabase) {
                 <p><strong>{foods.length} alimentos</strong> compatíveis com dieta {diet.label.toLowerCase()}.</p>
                 <p>Top 10 com maior densidade proteica (por 100g):</p>
               </div>
-              {renderTable(topFoods)}
+              <FoodTable foods={topFoods} />
             </div>
           );
         })}
@@ -139,9 +107,9 @@ function renderTable(foods: typeof foodDatabase) {
         {categories.map((category) => {
           const foods = getFoodsByCategory(category);
           return (
-            <div class="category-section" id={`cat-${category.toLowerCase().replace(/\s+/g, "-")}`}>
+            <div class="category-section" id={"cat-" + category.toLowerCase().replace(/\s+/g, "-")}>
               <h3>{category}</h3>
-              {renderTable(foods)}
+              <FoodTable foods={foods} />
             </div>
           );
         })}

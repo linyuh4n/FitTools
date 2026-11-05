@@ -37,12 +37,12 @@ export const footerNavigation = {
     { label: 'Calculadora de Calorias', href: '/ferramentas/calculadora-calorias/' },
   ],
   social: [
-    { label: 'Instagram', href: 'https://instagram.com/fittools', external: true },
-    { label: 'YouTube', href: 'https://youtube.com/@fittools', external: true },
+    { label: 'Instagram', href: 'https://instagram.com/fittool.app', external: true },
+    { label: 'YouTube', href: 'https://youtube.com/@fittool.app.channel', external: true },
   ],
 };
 
 export const socialLinks = {
-  instagram: 'https://instagram.com/fittools',
-  youtube: 'https://youtube.com/@fittools',
+  instagram: 'https://instagram.com/fittool.app',
+  youtube: 'https://youtube.com/@fittool.app.channel',
 };
